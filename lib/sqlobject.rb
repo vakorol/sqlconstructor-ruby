@@ -6,7 +6,6 @@ class SQLObject
 
     attr_accessor :alias
 
-
     def initialize
         @string = nil
         @alias  = nil

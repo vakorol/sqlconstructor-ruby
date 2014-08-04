@@ -19,7 +19,7 @@ class SQLExporter
     end
 
 
-    def print ( obj )
+    def export ( obj )
         if obj.is_a? SQLConstructor::GenericQuery
             @translator.export obj
         else
@@ -80,69 +80,23 @@ class SQLExporter
             return string
         end
 
-        
-        def sel_distinction ( obj )
-            return ( obj.attr_distinction || "" )
-        end
-
  
-        def gen_expression ( obj )
-            return obj.attr_objects.join ","
-        end
-
-
-        def gen_from ( obj )
-            result = "FROM " + Helper.printAliasHash( obj.from_hash )  if obj.from_hash
-            return ( result || "" )
-        end
-
-        
         def gen_joins ( obj )
-            result = ""
-            if obj.joins 
-                obj.joins.each do |join|
-                    result += join.type + " " + Helper.printAliasHash( join.sources )
+            arr_joins = [ ]
+            if obj.gen_joins 
+                obj.gen_joins.each do |join|
+                    result += join.type + " " + Helper.printAliasHash( join.join_sources )
                     result += self.separator
-                    result += "ON " + join.on_obj.to_s  if join.on_obj
+                    result += "ON " + join.join_on.to_s  if join.join_on
+                    arr_joins << result
                 end
             end
-            return result
+            return arr_joins.join( self.separator )
         end
 
-
-        def gen_where ( obj )
-            return ( obj.attr_where  ? "WHERE "+ obj.attr_where.to_s  : "" )
-        end
-
-
-        def sel_group_by ( obj )
-            string = ""
-            if obj.attr_group_by
-                string  = "GROUP BY " + obj.attr_group_by[:list].join( "," )
-                string += " " + obj.attr_group_by[:order]  if obj.attr_group_by[:order]
-            end
-        end
-
-        def gen_order_by ( obj )
-            string = ""
-            if obj.attr_order_by
-                string  = "ORDER BY " + obj.attr_order_by[:list].join( "," )
-                string += " " + obj.attr_order_by[:order]  if obj.attr_order_by[:order]
-            end
-        end
-
-        def sel_union ( obj )
-            result = ''
-            if obj.attr_union
-                result = obj.attr_union[:type] + " " + obj.attr_union[:object].to_s
-            end
-            return result
-        end
- 
-                                                                                    
         #############################################################################
-        #   Returns empty string for all undefined methods, so that a corrupt syntax
-        #   rule could be just ignored.
+        #   Construct an expression string for an object's attribute defined in
+        #   in the METHODS constant array.
         #############################################################################
         def method_missing ( method, *args )
             obj = args[0]
@@ -157,7 +111,9 @@ class SQLExporter
                     result += _attr[:val].to_s
                 elsif _attr[:val]
                     _attr[:val] = [ _attr[:val] ]  if ! _attr[:val].is_a? Array
-                    _attr[:val].each { |val|  result += val.to_s }
+#                    _attr[:val].each { |val|  result += val.to_s }
+#                    p _attr[:val]
+                    result += _attr[:val].join ","
                 end
             end
  
@@ -188,7 +144,7 @@ class SQLExporter
                             :sel_sql_result_size,
                             :sel_sql_cache,
                             :sel_sql_calc_found_rows,
-                            :gen_expression,
+                            :sel_expression,
                             :gen_from,    
                             :gen_joins,   
                             :gen_where,   
@@ -196,7 +152,7 @@ class SQLExporter
                             :sel_having,  
                             :gen_order_by,
                             :gen_limit,
-                            :sel_union
+                            :sel_unions
                         ]
 
          # The main rule for the MySQL DELETE query syntax
@@ -238,23 +194,23 @@ class SQLExporter
         #############################################################################
         def gen_from ( obj )
             result = ""
-            if obj.attr_from
-                result = "FROM " + Helper.to_sWithAliasesIndexes( obj, :attr_from )
+            if obj.gen_from
+                result = "FROM " + Helper.to_sWithAliasesIndexes( obj, obj.gen_from[:val] )
             end
             return result
         end
- 
 
         #############################################################################
         #   Forms a string for all JOINs for an object. Index hints included.
         #############################################################################
         def gen_joins ( obj )
             arr_joins = [ ]
-            if obj.attr_joins 
-                obj.attr_joins.each do |join|
-                    result  = join.type + " " + Helper.to_sWithAliasesIndexes( join, :sources )
+            if obj.gen_joins 
+                obj.gen_joins.each do |join|
+                    result  = join.type + " " + 
+                              Helper.to_sWithAliasesIndexes( join, join.join_sources )
                     result += self.separator
-                    result += "ON " + join.on_obj.to_s  if join.on_obj
+                    result += "ON " + join.join_on[:val].to_s  if join.join_on
                     arr_joins << result
                 end
             end
@@ -264,38 +220,12 @@ class SQLExporter
 
       ### MySQL-specific methods
 
-        def sel_high_priority ( obj )
-            return ( obj.attr_high_priority || "" )
-        end
- 
-        def sel_straight_join ( obj )
-            return ( obj.attr_straight_join || "" )
-        end
-
-        def sel_result_size ( obj )
-            return ( obj.attr_sql_result_size || "" )
-        end
-
-        def sel_cache ( obj )
-            return ( obj.attr_sql_cache || "" )
-        end
-
-        def sel_calc_found_rows ( obj )
-            return ( obj.attr_sql_calc_found_rows || "" )
-        end
-
-        def sel_having ( obj )
-            result = ""
-            result += "HAVING " + obj.attr_having.to_s  if obj.attr_having
-            return result
-        end
- 
         def gen_limit ( obj )
             result = ""
-            if obj.attr_first
+            if obj.gen_first
                 result += "LIMIT "           
-                result += obj.attr_skip.to_s + ","  if obj.attr_skip
-                result += obj.attr_first.to_s
+                result += obj.gen_skip[:val][0].to_s + ","  if obj.gen_skip
+                result += obj.gen_first[:val][0].to_s
             end
             return result
         end

@@ -1,10 +1,10 @@
-1. rename DBConnector to SQLConstructor
-2. setters for @dialect and @tidy
-3. BasicSelect needs asc/desc,
-4. In SQLExporter: rename all print* methods to export*
-5. in BasicJoin:  need method table() to push an object to the @sources list
-6. rename all @attr_indexes  to @index_hints
-7. (!) infinite loop occurs when a BasicSelect objects receives a call for a missing
+1. setters for @dialect and @tidy
+2. BasicSelect needs asc/desc,
+3. in BasicJoin:  need method table() to push an object to the @sources list
+4. (!!!) infinite loop occurs when a BasicSelect objects receives a call for a missing
 method: the call is passed to @caller, and there back to @caller.obj and so on
-8. tidy SQLConditional export
-9. get rid of ":col", use symbols
+5. tidy SQLConditional export
+6. get rid of ":col", use symbols
+7. dialect-specific BasicJoin child classes?
+8. UPDATE clause
+9. move index hints to child classes?

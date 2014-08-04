@@ -13,7 +13,9 @@ class SQLConditional < SQLObject
 
     attr_accessor :caller
 
-
+     # Dirty hack to make .join work on an array of SQLObjects
+    alias :to_str :to_s
+ 
     ##########################################################################
     #   Class constructor. Accepts an optional parameter to set the @caller 
     #   attribute, which is used in method_missing magic method to return 
@@ -27,7 +29,6 @@ class SQLConditional < SQLObject
         @caller  = _caller
     end
 
-
     ##########################################################################
     #   Adds another SQLConditional object to the conditions list of the
     #   current object. Example: 
@@ -40,7 +41,6 @@ class SQLConditional < SQLObject
         @string = nil
         return self     
     end
-
 
     ##########################################################################
     #    Negates the following conditional statement.

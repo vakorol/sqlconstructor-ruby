@@ -1,12 +1,26 @@
 
 class SQLConstructor::BasicSelect_mysql < SQLConstructor::BasicSelect
 
-    attr_reader :attr_high_priority, :attr_straight_join, 
-                :attr_sql_result_size, :attr_sql_cache, :attr_sql_calc_found_rows
+    attr_reader :sel_high_priority, :sel_straight_join, :sel_sql_result_size, 
+                :sel_sql_cache, :sel_sql_calc_found_rows
 
-    VALID_INDEX_HINTS = [ "USE INDEX", "FORCE INDEX", "IGNORE INDEX" ]
-    VALID_SQL_RESULT_SIZES = %w/SQL_SMALL_RESULT SQL_BIG_RESULT SQL_BUFFER_RESULT/
-
+    VALID_JOINS = [ "JOIN", "INNER JOIN", "CROSS JOIN", "LEFT JOIN", "RIGHT JOIN", 
+                    "LEFT OUTER JOIN", "RIGHT OUTER_JOIN",
+                    "NATURAL JOIN JOIN", "NATURAL LEFT JOIN", "NATURAL RIGHT JOIN", 
+                    "NATURAL LEFT OUTER JOIN", "NATURAL RIGHT OUTER JOIN" ]
+    METHODS = {
+                :straight_join => { :attr => 'sel_straight_join', :name => 'STRAIGHT_JOIN' },
+                :sql_cache     => { :attr => 'sel_sql_cache',     :name => 'SQL_CACHE'     },
+                :sql_no_cache  => { :attr => 'sel_sql_cache',     :name => 'SQL_NO_CACHE'  },
+                :high_priority => { :attr => 'sel_high_priority', :name => 'HIGH_PRIORITY' },
+                :sql_calc_found_rows => { 
+                                            :attr => 'sel_sql_calc_found_rows', 
+                                            :name => 'SQL_CALC_FOUND_ROWS'
+                                        },
+                :sql_small_result => { :attr => 'sel_sql_result_size', :name => 'SQL_SMALL_RESULT'  },
+                :sql_big_result   => { :attr => 'sel_sql_result_size', :name => 'SQL_BIG_RESULT'    },
+                :sql_buffer_result=> { :attr => 'sel_sql_result_size', :name => 'SQL_BUFFER_RESULT' },
+              }
 
     ##########################################################################
     #   Class constructor. 
@@ -15,20 +29,7 @@ class SQLConstructor::BasicSelect_mysql < SQLConstructor::BasicSelect
     ##########################################################################
     def initialize ( _caller, *list )
         super
-        @attr_high_priority       = nil
-        @attr_straight_join       = nil
-        @attr_sql_result_size     = nil
-        @attr_sql_cache           = nil
-        @attr_sql_calc_found_rows = nil
     end
-
-
-    def high_priority
-        @attr_high_priority = "HIGH_PRIORITY";
-        @string = nil
-        return self
-    end
-
 
     ##########################################################################
     #   Set the value for the SKIP,FIRST or LIMIT statement. Must be numeric value.
@@ -42,68 +43,15 @@ class SQLConstructor::BasicSelect_mysql < SQLConstructor::BasicSelect
         end
     end    
 
-
-    def straight_join
-        @attr_straight_join = "STRAIGHT_JOIN";
-        @string = nil
-        return self
-    end
-
-
-    def sql_cache
-        @attr_sql_cache = "SQL_CACHE";
-        @string = nil
-        return self
-    end
- 
-    def sql_no_cache
-        @attr_sql_cache = "SQL_NO_CACHE";
-        @string = nil
-        return self
-    end
-
-
-    def sql_calc_found_rows
-        @attr_sql_calc_found_rows = "SQL_CALC_FOUND_ROWS";
-        @string = nil
-        return self
-    end
-  
-
-    #############################################################################
-    #   Handle sql result size directives or pass method to parent
-    #############################################################################
-    def method_missing ( method, *args )
-        return _addSQLResultSize( method, *args )  if method =~ /^SQL_(?:SMALL|BIG|BUFFER)_RESULT$/
-         # Send missing method calls to @caller
-        return super
-    end
-
-
-  protected
-
-    ##########################################################################
-    #   Adds an SQL_[SMALL|BIG|BUFFER]_RESULT directive
-    ##########################################################################
-    def _addSQLResultSize ( type )
-        type = type.to_s.upcase
-        if ! VALID_SQL_RESULT_SIZES.include? type
-            raise NoMethodError, SQLException::UNKNOWN_METHOD + ": " + type
-        end
-        @attr_sql_result_size = type
-        @string = nil
-        return obj
-    end
-    
 end
 
 
 class SQLConstructor::BasicDelete_mysql < SQLConstructor::BasicDelete
 
-    attr_reader :attr_ignore, :attr_quick, :attr_low_priority
+    attr_reader :del_ignore, :del_quick, :del_low_priority
 
     METHODS = {
-                :low_priority => { :attr => 'del_priority', :name => 'LOW_PRIORITY' },
+                :low_priority => { :attr => 'del_low_priority', :name => 'LOW_PRIORITY' },
                 :quick        => { :attr => 'del_quick',    :name => 'QUICK '       },
                 :ignore       => { :attr => 'del_ignore',   :name => 'IGNORE'       }
               }

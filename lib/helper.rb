@@ -23,21 +23,21 @@ class Helper
         return arr.join ','
     end
 
-    def self.to_sWithAliasesIndexes( obj, attribute )
-        list = obj.send attribute
+
+    def self.to_sWithAliasesIndexes( obj, list )
         list = [ list ]  if ! list.is_a? Array
         arr  = [ ]
         list.each_with_index do |item,i|
             _alias = item.alias ? " " + item.alias.to_d : ""
             str = item.to_s + _alias
-            if obj.attr_index_hints
-                index_hash = obj.attr_index_hints[i]
+            if obj.gen_index_hints
+                index_hash = obj.gen_index_hints[i]
                 str += " " + index_hash[:type] + " " + index_hash[:list].to_s
             end
             arr << str
         end
         return arr.join ','
     end
- 
 
 end
+

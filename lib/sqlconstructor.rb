@@ -17,6 +17,9 @@ class SQLConstructor < SQLObject
     attr_accessor :exporter, :tidy
     attr_reader   :obj, :current_alias, :dialect
 
+     # Dirty hack to make .join work on an array of SQLConstructors
+    alias :to_str :to_s
+ 
     VALID_INDEX_HINTS = [ "USE INDEX", "FORCE INDEX", "IGNORE INDEX" ]
  
     ##########################################################################
@@ -68,12 +71,12 @@ class SQLConstructor < SQLObject
     ##########################################################################
     def to_s
         return @string  if @string
-        @string = @exporter.print @obj
+        @string = @exporter.export @obj
     end
 
- #########
+  #########
   private
- #########
+  #########
 
     ##########################################################################
     #   Returns an instance of Basic* child dialect-specific class 
@@ -89,97 +92,61 @@ class SQLConstructor < SQLObject
     end
  
 
-    ###############################################################################################
-    #   Internal class - generic query attributes and methods. Should be parent to all Basic*
-    #   classes
-    ###############################################################################################
+  ###############################################################################################
+  #   Internal class - generic query attributes and methods. Should be parent to all Basic*
+  #   classes
+  ###############################################################################################
     class GenericQuery < SQLObject
 
-        attr_reader :type, :dialect, :exporter, :caller, :tidy, :attr_where, :attr_from, 
-                    :attr_index_hints, :attr_first, :attr_skip, :attr_order_by, :attr_joins
+        attr_reader :type, :dialect, :exporter, :caller, :tidy, 
+                    :gen_where, :gen_from, :gen_index_hints, :gen_first, :gen_skip, 
+                    :gen_order_by, :gen_joins
 
+        METHODS = {
+                :from     => { :attr => 'gen_from',  :name => 'FROM',  :val => SQLObject       },
+                :where    => { :attr => 'gen_where', :name => 'WHERE', :val => SQLConditional  },
+                :first    => { :attr => 'gen_first', :name => 'FIRST', :val => SQLObject       },
+                :skip     => { :attr => 'gen_skip',  :name => 'SKIP',  :val => SQLObject       },
+                :order_by => { :attr => 'gen_order_by', :name => 'ORDER BY', :val => SQLObject },
+             }
+ 
         ##########################################################################
         #   Class constructor. 
         #   _caller     - the caller object
         #   *list       - list of sources for the FROM clause
         ##########################################################################
         def initialize ( _caller )
-            @attr_from        = nil
-            @attr_where       = nil
-            @attr_index_hints = nil
-            @attr_joins       = nil
-            @type             = nil
-            @string           = nil
-            @caller           = _caller
-            @dialect          = @caller.dialect
-            @tidy             = @caller.tidy
-            @exporter         = _caller.exporter
+            @type     = nil
+            @methods  = nil
+            @string   = nil
+            @caller   = _caller
+            @dialect  = @caller.dialect
+            @tidy     = @caller.tidy
+            @exporter = _caller.exporter
         end
-
 
         ##########################################################################
         #   Returns the METHODS hash of child dialect-specific class merged with
         #   parent's METHODS hash.
         ##########################################################################
         def getMethods
-            ancestor = self.class.ancestors[1]
-            methods_self    = self.class.const_get :METHODS || { }
-            methods_ancestor  = ancestor.const_get :METHODS || { }
-            methods_ancestor.merge methods_self
-        end
-
-
-        ##########################################################################
-        #   Adds a list of table names to the FROM clause
-        ##########################################################################
-        def from ( *sources )
-            new_list = Helper.getSources *sources
-            @attr_from ||= [ ]
-            @attr_from += new_list
-            @string = nil
-            return self
-        end
-
-        ##########################################################################
-        #   Creates a new SQLConditional object for the WHERE clause.
-        ##########################################################################
-        def where
-            @string = nil
-            @attr_where ||= SQLConditional.new self
-        end
-
-        ##########################################################################
-        #   Set the value for the SKIP (or LIMIT) statement. Must be numeric value.
-        ##########################################################################
-        def skip ( num )
-            raise( TypeError, SQLException::NUMERIC_VALUE_EXPECTED )  if ! num.is_a? Numeric
-            @attr_skip = SQLObject.get num
-            @string   = nil
-            return self
-        end
-
-        ##########################################################################
-        #   Set the value for the FIRST (or LIMIT) statement. Must be numeric value.
-        ##########################################################################
-        def first ( num )
-            raise( TypeError, SQLException::NUMERIC_VALUE_EXPECTED )  if ! num.is_a? Numeric
-            @attr_first  = SQLObject.get num
-            @string = nil
-            return self
-        end
-
-        ##########################################################################
-        #   Adds a list of ORDER BY items.
-        ##########################################################################
-        def order_by ( *list )
-            @attr_order_by ||= [ ]
-            @attr_order_by.append list.map { |item|  SQLObject.get item }
-            @string = nil
-            return self
+            if ! @methods
+                methods_self = { }
+                self.class.ancestors.each do |_class| 
+                    next  if ! _class.ancestors.include? SQLConstructor::GenericQuery
+                    class_methods = _class.const_get :METHODS || { }
+                    methods_self.merge! class_methods
+                end
+                @methods = methods_self
+            end
+            return @methods
         end
 
         #############################################################################
-        #   Send missing methods calls to the @caller object
+        #   Process method calls for entities described in METHODS constant array
+        #   of the calling object's class.
+        #   If no corresponding entries are found in all object's parent classes, then
+        #   send missing methods calls to the @caller object.
         #############################################################################
         def method_missing ( method, *args )
              # If the method is described in the class' METHODS constant hash, then
@@ -192,32 +159,55 @@ class SQLConstructor < SQLObject
             end
 
             if methods.has_key? method
-                method_hash = methods[method]
+                method_hash = methods[method].dup
                 attr_name = method_hash[:attr]
                 val_obj = nil
 
-                 # Create an SQLList out of arg if [:val] is SQLList class
+                 # get the current value of the objects attribute {attr_name}
+                begin
+                    cur_attr_val = self.send( attr_name.to_sym )[:val]
+                rescue
+                    cur_attr_val = nil
+                end
+ 
+                 # Create an SQLList out of arg if [:val] is SQLList class:
                 if method_hash[:val] == SQLList
                     method_hash[:val] = SQLList.new args
-                 # Create an array of SQLObjects if [:val] is SQLObject class
+                 # Create an array of SQLObjects if [:val] is SQLObject class:
                 elsif method_hash[:val] == SQLObject
                     method_hash[:val] = args.map{ |arg|  SQLObject.get arg }
-                 # create an  sqlobjects if [:val] is sqlobject class
+                 # Create an SQLList out of arg if [:val] is SQLList class:
+                elsif method_hash[:val] == SQLConstructor
+                    val_obj = SQLConstructor.new(
+                                                    :dialect  => @dialect,
+                                                    :tidy     => @tidy,
+                                                    :exporter => @exporter 
+                                                )
+                    method_hash[:val] = val_obj
+                 # create a BasicSelect dialect-specific child class: 
                 elsif method_hash[:val].is_a? BasicSelect
                     method_hash[:val] = SQLConstructor.new( 
-                                                            :dialect => @dialect, 
-                                                            :tidy => @tidy,
+                                                            :dialect  => @dialect, 
+                                                            :tidy     => @tidy,
                                                             :exporter => @exporter 
                                                           ).select( *args )
                  # If the :val parameter is some different class, then we should 
-                 # create an instance of it:
+                 # create an instance of it or return the existing value:
                 elsif method_hash[:val].is_a? Class
-                    val_obj = method_hash[:val].new self
-                    method_hash[:val] = val.obj
+                    val_obj = cur_attr_val || method_hash[:val].new( self )
+                    method_hash[:val] = val_obj
                 end
 
                 method_hash.delete(:attr)
-                self.class.send :attr_accessor, attr_name.to_sym
+
+                 # If the object already has attribute {attr_name} defined and it's
+                 # an array, then we should rather append to it than reassign the value
+                if cur_attr_val.is_a? Array
+                    cur_attr_val << method_hash[:val]
+                    method_hash[:val] = cur_attr_val
+                end
+
+                self.class.send :attr_accessor, attr_name.to_sym  if ! cur_attr_val
                 self.send "#{attr_name}=", method_hash
 
                 @string = nil
@@ -232,7 +222,7 @@ class SQLConstructor < SQLObject
         ##########################################################################
         def to_s
             return @string  if @string
-            @string = @exporter.print( self )
+            @string = @exporter.export self
         end
 
      ###########
@@ -244,26 +234,60 @@ class SQLConstructor < SQLObject
         ##########################################################################
         def _addJoin ( type, *tables )
             @string = nil
-            @attr_joins ||= [ ]
+            @gen_joins ||= [ ]
             join = BasicJoin.new( self, type, *tables )
-            @attr_joins << join
+            @gen_joins << join
             return join
+        end
+
+        ##########################################################################
+        #   Adds a USE/FORCE/IGNORE INDEX clause for the last objects in for_vals
+        #   argument.
+        ##########################################################################
+        def _addIndexes ( type, for_vals, *list )
+            type = type.to_s
+            type.upcase!.gsub! /_/, ' '
+            if ! SQLConstructor::VALID_INDEX_HINTS.include? type
+                raise NoMethodError, SQLException::INVALID_INDEX_HINT + ": " + type
+            end
+            @gen_index_hints ||= [ ]
+             # set the gen_index_hints for the last object in for_vals
+            last_ind = for_vals.length - 1
+            @gen_index_hints[last_ind] = { :type => type, :list => SQLObject.get( list ) }
+            @string = nil
+            return self
         end
        
     end
 
 
-    ###############################################################################################
-    #   Internal class which represents a basic SELECT statement.
-    ###############################################################################################
+  ###############################################################################################
+  #   Internal class which represents a basic SELECT statement.
+  ###############################################################################################
     class BasicSelect < GenericQuery
 
-        attr_reader :attr_objects, 
-                    :attr_group_by, :attr_union, :attr_index_hints, 
-                    :attr_distinction, :attr_having
+        attr_reader :sel_expression, :sel_group_by, :sel_unions, :gen_index_hints, 
+                    :sel_distinction, :sel_having
 
-        VALID_UNIONS = %w/union union_all union_distinct/
-
+        METHODS = {
+            :all         => { :attr => 'sel_distinction', :name => 'ALL'      },
+            :distinct    => { :attr => 'sel_distinction', :name => 'DISTINCT' },
+            :distinctrow => { :attr => 'sel_distinction', :name => 'DISTINCTROW' },
+            :having      => { 
+                                :attr => 'sel_having', 
+                                :name => 'HAVING', 
+                                :val  => SQLConditional       
+                            },
+            :group_by  => { :attr => 'sel_group_by', :name => 'GROUP BY',  :val => SQLObject },
+            :union     => { :attr => 'sel_unions',   :name => 'UNION',     :val => SQLConstructor },
+            :union_all => { :attr => 'sel_unions',   :name => 'UNION_ALL', :val => SQLConstructor },
+            :union_distinct => { 
+                                :attr => 'sel_unions',   
+                                :name => 'UNION_DISTINCT', 
+                                :val  => SQLConstructor 
+                               },
+        }
+ 
         ##########################################################################
         #   Class constructor. 
         #   _caller     - the caller object
@@ -271,54 +295,13 @@ class SQLConstructor < SQLObject
         ##########################################################################
         def initialize ( _caller, *list )
             super _caller
-            @attr_first               = nil
-            @attr_skip                = nil 
-            @attr_order_by            = nil
-            @attr_group_by            = nil
-            @attr_union               = nil
-            @attr_joins               = nil
-            @attr_distinction         = nil
-            @attr_having              = nil
-            @attr_objects = list.map{ |obj|  SQLObject.get obj } 
+            @sel_expression = {
+                                :attr => 'sel_expression',
+                                :name => '',
+                                :val  => list.map{ |obj|  SQLObject.get obj }
+                              }
         end
 
-
-        def all
-            @attr_distinction = "ALL"
-            @string = nil
-            return self
-        end 
- 
-        def distinct
-            @attr_distinction = "DISTINCT"
-            @string = nil
-            return self
-        end 
-
-        def distinctrow
-            @attr_distinction = "DISTINCTROW"
-            @string = nil
-            return self
-        end 
- 
-        ##########################################################################
-        #   Creates a new SQLConditional object for the HAVING clause.
-        ##########################################################################
-        def having
-            @string = nil
-            @attr_having ||= SQLConditional.new self
-        end
-
-        ##########################################################################
-        #   Adds a list of GROUP BY items.
-        ##########################################################################
-        def group_by ( *list )
-            @attr_group_by ||= [ ]
-            @attr_group_by.append list.map { |item|  SQLObject.get item }
-            @string = nil
-            return self
-        end
- 
         #############################################################################
         #   Send missing methods calls to the @caller object, and also handle
         #   JOINs, UNIONs and INDEX hints
@@ -327,64 +310,29 @@ class SQLConstructor < SQLObject
              # Handle all [*_]join calls:
             return _addJoin( method, *args )        if method =~ /^[a-z_]*join$/
              # Handle all *_index calls:
-            return _addIndexes( method, *args )     if method =~ /^[a-z]+_index$/
-             # Handle all union[_*] calls:
-            return _addUnion( method, *args )       if method =~ /^union(?:_[a-z]+)?$/
+            return _addIndexes( method, @gen_from[:val], *args )  if method =~ /^[a-z]+_index$/
             super
-        end
-
-     #########
-      protected
-     #########
-
-        ##########################################################################
-        #   Adds a USE/FORCE/IGNORE INDEX clause for the last object in the
-        #   FROM clause.
-        ##########################################################################
-        def _addIndexes ( type, *list )
-            if ! SQLConstructor::VALID_INDEX_HINTS.include? type
-                raise NoMethodError, SQLException::INVALID_INDEX_HINT + ": " + type
-            end
-            @attr_index_hints ||= [ ]
-             # set the indexes for the last object in @attr_from
-            from_index = @attr_from.length - 1
-            @attr_index_hints[from_index] = { :type => type, :list => SQLObject.get( list ) }
-            @string = nil
-            return self
-        end
-
-        ##########################################################################
-        #   Create a new BasicSelect object and set the @union attribute value of self 
-        #   to a hash containing object and specified type
-        ##########################################################################
-        def _addUnion ( type )
-            type = type.to_s
-            if ! VALID_UNIONS.include? type
-                raise NoMethodError, SQLException::UNKNOWN_METHOD + ": " + type
-            end
-            type.upcase!.gsub! /_/, ' '
-            obj = SQLConstructor.new( :exporter => @exporter, :dialect => @dialect,
-                                      :tidy => @tidy )
-            @attr_union = { :object => obj, :type => type }
-            @string = nil
-            return obj
         end
 
     end
 
 
-    ###############################################################################################
-    #   Internal class which represents a basic JOIN statement.
-    ###############################################################################################
+  ###############################################################################################
+  #   Internal class which represents a basic JOIN statement.
+  ###############################################################################################
     class BasicJoin < GenericQuery
 
-        attr_reader :on_obj, :sources, :using_list
+        attr_reader :join_on, :join_sources, :join_using
 
         VALID_JOINS = [ "JOIN", "INNER JOIN", "CROSS JOIN", "LEFT JOIN", "RIGHT JOIN", 
                         "LEFT OUTER JOIN", "RIGHT OUTER_JOIN",
                         "NATURAL JOIN JOIN", "NATURAL LEFT JOIN", "NATURAL RIGHT JOIN", 
                         "NATURAL LEFT OUTER JOIN", "NATURAL RIGHT OUTER JOIN" ]
-
+        METHODS = {
+            :on    => { :attr => 'join_on',    :name => 'ON',    :val => SQLConditional },
+            :using => { :attr => 'join_using', :name => 'USING', :val => SQLObject      },
+        }
+ 
         ##########################################################################
         #   Class contructor. Takes a caller object as the first argument, JOIN 
         #   type as the second argument, and a list of sources for the JOIN clause
@@ -397,28 +345,8 @@ class SQLConstructor < SQLObject
             end
   
             super _caller
-            @type       = type
-            @sources    = Helper.getSources sources
-            @using_list = nil
-            @on_obj     = nil
-        end
-
-        #############################################################################
-        #   Adds an ON condition to the JOIN statement
-        #############################################################################
-        def on
-            @string   = nil
-            @on_obj ||= SQLConditional.new( self )
-        end
-
-        #############################################################################
-        #   Adds an USING condition to the JOIN statement
-        #############################################################################
-        def using ( *cols )
-            @using_list ||= [ ]
-            @using_list.append cols.map { |col|  SQLObject.get col }
-            @string = nil
-            return self
+            @type         = type
+            @join_sources = Helper.getSources sources
         end
 
         #############################################################################
@@ -427,37 +355,19 @@ class SQLConstructor < SQLObject
         #############################################################################
         def method_missing ( method, *args )
              # Handle all *_index calls:
-            return _addIndexes( method, *args )  if method =~ /^[a-z]+_index$/
+            return _addIndexes( method, @join_sources, *args )  if method =~ /^[a-z]+_index$/
             super
-        end
-
-     #########
-      protected
-     #########
-
-        def _addIndexes ( type, *list )
-            type = type.to_s
-            type.upcase!.gsub! /_/, ' '
-            if ! SQLConstructor::VALID_INDEX_HINTS.include? type
-                raise NoMethodError, SQLException::INVALID_INDEX_HINT + ": " + type
-            end
-            @attr_index_hints ||= [ ]
-             # set the attr_index_hints for the last object in @sources
-            sources_index = @sources.length - 1
-            @attr_index_hints[sources_index] = { :type => type, :list => SQLObject.get( list ) }
-            @string = nil
-            return self
         end
 
     end
 
 
-    ###############################################################################################
-    #   Internal class which represents a basic DELETE statement.
-    ###############################################################################################
+  ###############################################################################################
+  #   Internal class which represents a basic DELETE statement.
+  ###############################################################################################
     class BasicDelete < GenericQuery
 
-        attr_reader :attr_using
+        attr_reader :del_using
 
         METHODS = {
                     :using   => { :attr => 'del_using', :name => 'USING', :val => SQLObject }
@@ -468,11 +378,12 @@ class SQLConstructor < SQLObject
         #   _caller     - the caller object
         ##########################################################################
         def initialize ( _caller )
-            super _caller
-            @attr_using = nil
+            super
         end
 
-
+        #############################################################################
+        #   Handle JOINs or send call to the parent.
+        #############################################################################
         def method_missing ( method, *args )
              # Handle all [*_]join calls:
             return _addJoin( method, *args )  if method =~ /^[a-z_]*join$/
@@ -482,9 +393,9 @@ class SQLConstructor < SQLObject
     end 
 
 
-    ###############################################################################################
-    #   Internal class which represents a basic INSERT statement.
-    ###############################################################################################
+  ###############################################################################################
+  #   Internal class which represents a basic INSERT statement.
+  ###############################################################################################
     class BasicInsert < GenericQuery
 
         attr_reader :ins_into, :ins_values, :ins_set, :ins_columns, :ins_select
