@@ -20,8 +20,11 @@
                             :gen_joins,   
                             :gen_where,   
                             :sel_group_by,
+                            :sel_group_by_order,
+                            :sel_group_by_with_rollup,
                             :sel_having,  
                             :gen_order_by,
+                            :gen_order_by_order,
                             :gen_limit,
                             :sel_unions
                         ]

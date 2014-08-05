@@ -16,7 +16,11 @@ class SQLConstructor::BasicSelect_mysql < SQLConstructor::BasicSelect
                 :sql_small_result => { :attr => 'sel_sql_result_size', :name => 'SQL_SMALL_RESULT'  },
                 :sql_big_result   => { :attr => 'sel_sql_result_size', :name => 'SQL_BIG_RESULT'    },
                 :sql_buffer_result=> { :attr => 'sel_sql_result_size', :name => 'SQL_BUFFER_RESULT' },
-                :limit            => { :attr => 'gen_limit', :name => 'LIMIT', :val => SQLObject }
+                :limit            => { :attr => 'gen_limit', :name => 'LIMIT', :val => SQLObject },
+                :group_by_with_rollup => { 
+                                            :attr => 'sel_group_by_with_rollup', 
+                                            :name => "WITH ROLLUP" 
+                                         }
               }
 
     ##########################################################################

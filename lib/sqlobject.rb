@@ -26,7 +26,7 @@ class SQLObject
                 expr
             elsif expr.is_a? Array or expr.is_a? Range
                 SQLList.new *expr.to_a
-            elsif expr =~ /^\:/
+            elsif expr.is_a? Symbol
                 SQLColumn.new( expr )
             else
                 SQLValue.new( expr )
@@ -51,7 +51,7 @@ class SQLColumn < SQLObject
 
     ##########################################################################
     def to_s
-        @name
+        @name.to_s
     end
 
   private

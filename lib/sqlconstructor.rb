@@ -75,7 +75,7 @@ class SQLConstructor < SQLObject
             return @obj.send( method, *args )
         end
         raise NoMethodError, SQLException::UNKNOWN_METHOD + 
-            ": #{method.to_s} from #{@obj.class.name}"
+            ": '#{method.to_s}' from #{@obj.class.name}"
     end
     
     ##########################################################################
@@ -118,7 +118,9 @@ class SQLConstructor < SQLObject
                 :first    => { :attr => 'gen_first', :name => 'FIRST', :val => SQLObject       },
                 :skip     => { :attr => 'gen_skip',  :name => 'SKIP',  :val => SQLObject       },
                 :order_by => { :attr => 'gen_order_by', :name => 'ORDER BY', :val => SQLObject },
-             }
+                :order_by_asc  => { :attr => 'gen_order_by_order', :name => 'ASC' },
+                :order_by_desc => { :attr => 'gen_order_by_order', :name => 'DESC' },
+               }
  
         ##########################################################################
         #   Class constructor. 
@@ -280,7 +282,7 @@ class SQLConstructor < SQLObject
     class BasicSelect < GenericQuery
 
         attr_reader :sel_expression, :sel_group_by, :sel_unions, :gen_index_hints, 
-                    :sel_distinction, :sel_having
+                    :sel_distinction, :sel_having, :sel_group_by_order 
 
         METHODS = {
             :all         => { :attr => 'sel_distinction', :name => 'ALL'      },
@@ -292,6 +294,8 @@ class SQLConstructor < SQLObject
                                 :val  => SQLConditional       
                             },
             :group_by  => { :attr => 'sel_group_by', :name => 'GROUP BY',  :val => SQLObject },
+            :group_by_asc  => { :attr => 'sel_group_by_order', :name => 'ASC' },
+            :group_by_desc => { :attr => 'sel_group_by_order', :name => 'DESC' },
             :union     => { :attr => 'sel_unions',   :name => 'UNION',     :val => SQLConstructor },
             :union_all => { :attr => 'sel_unions',   :name => 'UNION_ALL', :val => SQLConstructor },
             :union_distinct => { 
