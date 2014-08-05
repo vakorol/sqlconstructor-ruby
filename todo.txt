@@ -8,3 +8,5 @@ method: the call is passed to @caller, and there back to @caller.obj and so on
 7. dialect-specific BasicJoin child classes?
 8. UPDATE clause
 9. move index hints to child classes?
+10. special keywords NULL and DEFAULT (?)
+11. move all export rules to dialect-specific GenericQuery child classes

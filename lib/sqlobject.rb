@@ -25,7 +25,7 @@ class SQLObject
             if expr.is_a? SQLObject
                 expr
             elsif expr.is_a? Array or expr.is_a? Range
-                SQLList.new expr.to_a
+                SQLList.new *expr.to_a
             elsif expr =~ /^\:/
                 SQLColumn.new( expr )
             else
@@ -115,7 +115,7 @@ end
 ###   Class container - a list of SQLValue scalars
 ###############################################################################################
 class SQLList < SQLObject
-    def initialize ( list = [ ] )
+    def initialize ( *list )
         @list = list.map { |item|  SQLObject.get item }
     end
 
@@ -130,3 +130,20 @@ class SQLList < SQLObject
 end
  
 
+###############################################################################################
+###
+###############################################################################################
+class SQLCondList < SQLObject
+    def initialize ( hash = { } )
+        @hash = Hash[ hash.map{ |k,v|  [ SQLObject.get( k ), SQLObject.get( v ) ] } ]
+    end
+
+    def << ( new_hash )
+        @hash.merge! new_hash
+    end
+
+    def to_s
+        @hash.map{ |k,v| k.to_s + "=" + v.to_s }.join( "," )
+    end
+end
+ 

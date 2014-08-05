@@ -59,13 +59,23 @@ class SQLConstructor < SQLObject
     def insert
         _getGenericQuery 'insert'
     end
-  
+
+    ##########################################################################
+    #   Add a UPDATE statement
+    ##########################################################################
+    def update ( *tabs )
+        _getGenericQuery 'update', *tabs
+    end
+   
     ##########################################################################
     #   Pass all unknown methods to @obj 
     ##########################################################################
     def method_missing ( method, *args )
-        return @obj.send( method, *args )  if @obj
-        raise NoMethodError, SQLException::UNKNOWN_METHOD + ": " + method.to_s
+        if @obj && @obj.child_caller != @obj
+            return @obj.send( method, *args )
+        end
+        raise NoMethodError, SQLException::UNKNOWN_METHOD + 
+            ": #{method.to_s} from #{@obj.class.name}"
     end
     
     ##########################################################################
@@ -98,7 +108,7 @@ class SQLConstructor < SQLObject
   ###############################################################################################
     class GenericQuery < SQLObject
 
-        attr_reader :type, :dialect, :exporter, :caller, :tidy, 
+        attr_reader :type, :dialect, :exporter, :caller, :child_caller, :tidy, 
                     :gen_where, :gen_from, :gen_index_hints, :gen_first, :gen_skip, 
                     :gen_order_by, :gen_joins
 
@@ -123,7 +133,12 @@ class SQLConstructor < SQLObject
             @dialect  = @caller.dialect
             @tidy     = @caller.tidy
             @exporter = _caller.exporter
-        end
+            begin
+                @methods = self.getMethods
+            rescue
+                @methods = { }
+            end
+         end
 
         ##########################################################################
         #   Returns the METHODS hash of child dialect-specific class merged with
@@ -152,14 +167,8 @@ class SQLConstructor < SQLObject
              # If the method is described in the class' METHODS constant hash, then
              # create an instance attribute with the proper name, an attr_reader for
              # it, and set it's value to the one in METHODS.
-            begin
-                methods = self.getMethods
-            rescue
-                methods = nil
-            end
-
-            if methods.has_key? method
-                method_hash = methods[method].dup
+            if @methods.has_key? method
+                method_hash = @methods[method].dup
                 attr_name = method_hash[:attr]
                 val_obj = nil
 
@@ -170,9 +179,10 @@ class SQLConstructor < SQLObject
                     cur_attr_val = nil
                 end
  
-                 # Create an SQLList out of arg if [:val] is SQLList class:
-                if method_hash[:val] == SQLList
-                    method_hash[:val] = SQLList.new args
+                 # Create an instance of the corresponding class if [:val] is SQLList 
+                 # or SQLCondList class:
+                if [ SQLList, SQLCondList ].include? method_hash[:val]
+                    method_hash[:val] = method_hash[:val].new *args
                  # Create an array of SQLObjects if [:val] is SQLObject class:
                 elsif method_hash[:val] == SQLObject
                     method_hash[:val] = args.map{ |arg|  SQLObject.get arg }
@@ -201,8 +211,10 @@ class SQLConstructor < SQLObject
                 method_hash.delete(:attr)
 
                  # If the object already has attribute {attr_name} defined and it's
-                 # an array, then we should rather append to it than reassign the value
-                if cur_attr_val.is_a? Array
+                 # an array or one of the SQL* class containers, then we should rather 
+                 # append to it than reassign the value
+                if cur_attr_val.is_a? Array || 
+                   [ SQLList, SQLCondList ].include?( cur_attr_val.class )
                     cur_attr_val << method_hash[:val]
                     method_hash[:val] = cur_attr_val
                 end
@@ -215,6 +227,7 @@ class SQLConstructor < SQLObject
             end
 
              # Otherwise send the call to @caller object
+            @child_caller = self
             return @caller.send( method.to_sym, *args )  if @caller
             raise NoMethodError, SQLException::UNKNOWN_METHOD + ": " + method.to_s
         end
@@ -403,9 +416,9 @@ class SQLConstructor < SQLObject
         METHODS = {
                     :into    => { :attr => 'ins_into',    :name => 'INTO',    :val => SQLObject },
                     :values  => { :attr => 'ins_values',  :name => 'VALUES',  :val => SQLList   },
-                    :set     => { :attr => 'ins_set',     :name => 'SET',     :val => SQLConditional },
+                    :set     => { :attr => 'ins_set',     :name => 'SET',     :val => SQLCondList },
                     :columns => { :attr => 'ins_columns', :name => 'COLUMNS', :val => SQLObject },
-                    :select  => { :attr => 'ins_select',  :name => '',        :val => BasicSelect },
+                    :select  => { :attr => 'ins_select',  :name => '',        :val => BasicSelect }
                   }
  
         ##########################################################################
@@ -418,8 +431,36 @@ class SQLConstructor < SQLObject
 
     end 
  
-end
 
+  ###############################################################################################
+  #   Internal class which represents a basic INSERT statement.
+  ###############################################################################################
+    class BasicUpdate < GenericQuery
+
+        attr_reader :upd_tables, :upd_set, :gen_where, :gen_order_by
+
+        METHODS = {
+                    :tables  => { :attr => 'upd_tables',  :name => '', :val => SQLObject },
+                    :set     => { :attr => 'upd_set',  :name => 'SET', :val => SQLCondList },
+                  }
+ 
+        ##########################################################################
+        #   Class constructor. 
+        #   _caller     - the caller object
+        ##########################################################################
+        def initialize ( _caller, *list )
+            super _caller
+            @upd_tables = {
+                              :attr => 'upd_tables',
+                              :name => '',
+                              :val  => list.map{ |obj|  SQLObject.get obj }
+                          }
+        end
+
+    end 
+ 
+end
+ 
 
 ##################################################################################################
 ##################################################################################################

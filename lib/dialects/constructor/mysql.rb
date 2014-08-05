@@ -2,12 +2,8 @@
 class SQLConstructor::BasicSelect_mysql < SQLConstructor::BasicSelect
 
     attr_reader :sel_high_priority, :sel_straight_join, :sel_sql_result_size, 
-                :sel_sql_cache, :sel_sql_calc_found_rows
+                :sel_sql_cache, :sel_sql_calc_found_rows, :gen_limit
 
-    VALID_JOINS = [ "JOIN", "INNER JOIN", "CROSS JOIN", "LEFT JOIN", "RIGHT JOIN", 
-                    "LEFT OUTER JOIN", "RIGHT OUTER_JOIN",
-                    "NATURAL JOIN JOIN", "NATURAL LEFT JOIN", "NATURAL RIGHT JOIN", 
-                    "NATURAL LEFT OUTER JOIN", "NATURAL RIGHT OUTER JOIN" ]
     METHODS = {
                 :straight_join => { :attr => 'sel_straight_join', :name => 'STRAIGHT_JOIN' },
                 :sql_cache     => { :attr => 'sel_sql_cache',     :name => 'SQL_CACHE'     },
@@ -20,6 +16,7 @@ class SQLConstructor::BasicSelect_mysql < SQLConstructor::BasicSelect
                 :sql_small_result => { :attr => 'sel_sql_result_size', :name => 'SQL_SMALL_RESULT'  },
                 :sql_big_result   => { :attr => 'sel_sql_result_size', :name => 'SQL_BIG_RESULT'    },
                 :sql_buffer_result=> { :attr => 'sel_sql_result_size', :name => 'SQL_BUFFER_RESULT' },
+                :limit            => { :attr => 'gen_limit', :name => 'LIMIT', :val => SQLObject }
               }
 
     ##########################################################################
@@ -31,29 +28,18 @@ class SQLConstructor::BasicSelect_mysql < SQLConstructor::BasicSelect
         super
     end
 
-    ##########################################################################
-    #   Set the value for the SKIP,FIRST or LIMIT statement. Must be numeric value.
-    ##########################################################################
-    def limit ( val1, val2 = nil )
-        if val2
-            self.first val2
-            self.skip  val1
-        else
-            self.first val1
-        end
-    end    
-
 end
 
 
 class SQLConstructor::BasicDelete_mysql < SQLConstructor::BasicDelete
 
-    attr_reader :del_ignore, :del_quick, :del_low_priority
+    attr_reader :del_ignore, :del_quick, :del_low_priority, :gen_limit
 
     METHODS = {
                 :low_priority => { :attr => 'del_low_priority', :name => 'LOW_PRIORITY' },
                 :quick        => { :attr => 'del_quick',    :name => 'QUICK '       },
-                :ignore       => { :attr => 'del_ignore',   :name => 'IGNORE'       }
+                :ignore       => { :attr => 'del_ignore',   :name => 'IGNORE'       },
+                :limit        => { :attr => 'gen_limit', :name => 'LIMIT', :val => SQLObject }
               }
  
     ##########################################################################
@@ -66,18 +52,6 @@ class SQLConstructor::BasicDelete_mysql < SQLConstructor::BasicDelete
         @attr_low_priority = nil
         @attr_quick = nil
     end
-
-    ##########################################################################
-    #   Set the value for the SKIP,FIRST or LIMIT statement. Must be numeric value.
-    ##########################################################################
-    def limit ( val1, val2 = nil )
-        if val2
-            self.first val2
-            self.skip  val1
-        else
-            self.first val1
-        end
-    end    
 
 end 
 
@@ -107,4 +81,27 @@ class SQLConstructor::BasicInsert_mysql < SQLConstructor::BasicInsert
         super
     end
 
+end
+
+
+class SQLConstructor::BasicUpdate_mysql < SQLConstructor::BasicUpdate
+
+    attr_reader :upd_low_priority, :upd_ignore, :gen_limit
+
+    METHODS = {
+               :low_priority => { :attr => 'upd_low_priority', :name => 'LOW_PRIORITY' },
+               :ignore       => { :attr => 'upd_ignore',       :name => 'IGNORE',      },
+               :limit        => { :attr => 'gen_limit', :name => 'LIMIT', :val => SQLObject }
+              }
+
+    ##########################################################################
+    #   Class constructor. 
+    #   _caller     - the caller object
+    ##########################################################################
+    def initialize ( _caller, *list )
+        super
+    end
+
 end 
+
+ 
