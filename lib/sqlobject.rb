@@ -4,7 +4,7 @@
 ###############################################################################################
 class SQLObject
 
-    attr_accessor :alias
+    attr_accessor :alias, :separator
 
     def initialize
         @string = nil

@@ -108,9 +108,10 @@ class SQLConstructor < SQLObject
   ###############################################################################################
     class GenericQuery < SQLObject
 
-        attr_reader :type, :dialect, :exporter, :caller, :child_caller, :tidy, 
+        attr_accessor :caller
+        attr_reader :type, :dialect, :exporter, :child_caller, :tidy, 
                     :gen_where, :gen_from, :gen_index_hints, :gen_first, :gen_skip, 
-                    :gen_order_by, :gen_joins
+                    :gen_order_by, :gen_joins, :gen_order_by_order
 
         METHODS = {
                 :from     => { :attr => 'gen_from',  :name => 'FROM',  :val => SQLObject       },
@@ -175,9 +176,10 @@ class SQLConstructor < SQLObject
                 val_obj = nil
 
                  # get the current value of the objects attribute {attr_name}
-                begin
+                if self.respond_to?( attr_name.to_sym ) && 
+                   self.send( attr_name.to_sym ).is_a?( Hash )
                     cur_attr_val = self.send( attr_name.to_sym )[:val]
-                rescue
+                else
                     cur_attr_val = nil
                 end
  
@@ -188,13 +190,15 @@ class SQLConstructor < SQLObject
                  # Create an array of SQLObjects if [:val] is SQLObject class:
                 elsif method_hash[:val] == SQLObject
                     method_hash[:val] = args.map{ |arg|  SQLObject.get arg }
-                 # Create an SQLList out of arg if [:val] is SQLList class:
-                elsif method_hash[:val] == SQLConstructor
-                    val_obj = SQLConstructor.new(
+                 # Create an instance of the corresponding class if [:val] is 
+                 # SQLConstructor or SQLConditional class:
+                elsif [ SQLConstructor, SQLConditional ].include? method_hash[:val]
+                    val_obj = cur_attr_val || method_hash[:val].new(
                                                     :dialect  => @dialect,
                                                     :tidy     => @tidy,
-                                                    :exporter => @exporter 
-                                                )
+                                                    :exporter => @exporter,
+                                                    :caller   => self
+                                              )
                     method_hash[:val] = val_obj
                  # create a BasicSelect dialect-specific child class: 
                 elsif method_hash[:val].is_a? BasicSelect
@@ -205,9 +209,9 @@ class SQLConstructor < SQLObject
                                                           ).select( *args )
                  # If the :val parameter is some different class, then we should 
                  # create an instance of it or return the existing value:
-                elsif method_hash[:val].is_a? Class
-                    val_obj = cur_attr_val || method_hash[:val].new( self )
-                    method_hash[:val] = val_obj
+#                elsif method_hash[:val].is_a? Class
+#                    val_obj = cur_attr_val || method_hash[:val].new( self )
+#                    method_hash[:val] = val_obj
                 end
 
                 method_hash.delete(:attr)
@@ -363,7 +367,7 @@ class SQLConstructor < SQLObject
   
             super _caller
             @type         = type
-            @join_sources = Helper.getSources sources
+            @join_sources = Helper.getSources *sources
         end
 
         #############################################################################

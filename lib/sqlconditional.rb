@@ -22,11 +22,19 @@ class SQLConditional < SQLObject
     #   control to the calling SQLConstructor object (see method_missing for 
     #   more info).
     ##########################################################################
-    def initialize ( _caller = nil )
+    def initialize ( params = nil )
+        @dialect, @tidy, @separator = nil, false, " "
+        if params.is_a? Hash
+            @caller = params[ :caller  ]
+            if @caller
+                @dialect   = params[ :dialect ] || @caller.dialect
+                @tidy      = params[ :tidy    ] || @caller.tidy
+                @separator = @caller.exporter.separator  if @caller.exporter  
+            end
+        end
         @list    = [ ]
         @objects = [ ]
         @string  = nil
-        @caller  = _caller
     end
 
     ##########################################################################
@@ -37,6 +45,7 @@ class SQLConditional < SQLObject
     ##########################################################################
     def is ( cond )
         raise SQLException, SQLException::INVALID_CONDITIONAL  if ! cond.is_a? SQLObject
+        cond.separator = @separator
         @list << cond
         @string = nil
         return self     
@@ -107,7 +116,8 @@ class SQLConditional < SQLObject
 
     def to_s
         return @string  if @string
-        @string = "("
+        @string = @separator
+        @string += "("
 
         @list.each do |item|
             @string += item.to_s
@@ -160,7 +170,7 @@ class SQLConditional < SQLObject
 
         def to_s
             return @string  if @string
-            @string = " "
+                @string = " "
             if @objects.empty?
                 @string += " " + @operator + " "
             else

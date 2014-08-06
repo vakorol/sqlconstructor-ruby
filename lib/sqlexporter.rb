@@ -2,6 +2,7 @@
 class SQLExporter
 
     attr_accessor :dialect, :tidy
+    attr_reader :separator
 
     DEFAULT_DIALECT = :mysql
     VALID_DIALECTS  = [ 'mysql', 'informix' ]
@@ -16,6 +17,7 @@ class SQLExporter
         @tidy    = tidy
         dialect_class = "Dialect_" + dialect.to_s
         @translator = SQLExporter.const_get( dialect_class ).new( tidy )
+        @separator = @translator.separator
     end
 
 
@@ -33,6 +35,8 @@ class SQLExporter
  
     class Dialect_generic
 
+        attr_reader :separator
+
          # The main rule for the generic DELETE query syntax
         DELETE_SYNTAX = [
                             "DELETE",
@@ -46,11 +50,6 @@ class SQLExporter
         def initialize ( tidy )
             @tidy = tidy
             @separator = @tidy ? "\n" : " "
-        end
-
-
-        def separator
-            @tidy ? "\n" : " "
         end
 
 
@@ -70,11 +69,11 @@ class SQLExporter
             string = ""
             rules.each do |rule|
                 if rule.is_a? String
-                    string += rule + self.separator
+                    string += rule + @separator
                 elsif rule.is_a? Symbol
                     res = self.send( rule, obj ).to_s
                     string += res
-                    string += self.separator  if ! res.empty?
+                    string += @separator  if ! res.empty?
                 end
             end
             return string
@@ -86,12 +85,12 @@ class SQLExporter
             if obj.gen_joins 
                 obj.gen_joins.each do |join|
                     result += join.type + " " + Helper.printAliasHash( join.join_sources )
-                    result += self.separator
+                    result += @separator
                     result += "ON " + join.join_on.to_s  if join.join_on
                     arr_joins << result
                 end
             end
-            return arr_joins.join( self.separator )
+            return arr_joins.join( @separator )
         end
 
         #############################################################################

@@ -1,11 +1,11 @@
 1. setters for @dialect and @tidy
 3. in BasicJoin:  need method table() to push an object to the @sources list
-5. tidy SQLConditional export
 7. dialect-specific BasicJoin child classes?
 9. move index hints to child classes?
 11. move all export rules to dialect-specific GenericQuery child classes
 12. get rid of helper
+13. removal of clauses
+14. separator() -> setSeparator() to set @separator (with attr_reader)
 
-+infinite loop
-+symbols instead of ":col"
-+asc/desc in select
++/-  5. tidy SQLConditional export
+

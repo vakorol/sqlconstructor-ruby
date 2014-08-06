@@ -2,7 +2,7 @@
 class SQLConstructor::BasicSelect_mysql < SQLConstructor::BasicSelect
 
     attr_reader :sel_high_priority, :sel_straight_join, :sel_sql_result_size, 
-                :sel_sql_cache, :sel_sql_calc_found_rows, :gen_limit
+                :sel_sql_cache, :sel_sql_calc_found_rows, :gen_limit, :sel_group_by_with_rollup
 
     METHODS = {
                 :straight_join => { :attr => 'sel_straight_join', :name => 'STRAIGHT_JOIN' },
