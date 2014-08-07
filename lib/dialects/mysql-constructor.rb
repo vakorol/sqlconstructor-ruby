@@ -1,4 +1,7 @@
 
+##########################################################################################
+#   MySQL dialect descendant of BasicSelect class
+##########################################################################################
 class SQLConstructor::BasicSelect_mysql < SQLConstructor::BasicSelect
 
     attr_reader :sel_high_priority, :sel_straight_join, :sel_sql_result_size, 
@@ -35,6 +38,9 @@ class SQLConstructor::BasicSelect_mysql < SQLConstructor::BasicSelect
 end
 
 
+##########################################################################################
+#   MySQL dialect descendant of BasicDelete class
+##########################################################################################
 class SQLConstructor::BasicDelete_mysql < SQLConstructor::BasicDelete
 
     attr_reader :del_ignore, :del_quick, :del_low_priority, :gen_limit
@@ -60,6 +66,9 @@ class SQLConstructor::BasicDelete_mysql < SQLConstructor::BasicDelete
 end 
 
 
+##########################################################################################
+#   MySQL dialect descendant of BasicInsert class
+##########################################################################################
 class SQLConstructor::BasicInsert_mysql < SQLConstructor::BasicInsert
 
     attr_reader :ins_priority, :ins_quick, :ins_ignore, :ins_on_duplicate_key_update
@@ -88,6 +97,9 @@ class SQLConstructor::BasicInsert_mysql < SQLConstructor::BasicInsert
 end
 
 
+##########################################################################################
+#   MySQL dialect descendant of BasicUpdate class
+##########################################################################################
 class SQLConstructor::BasicUpdate_mysql < SQLConstructor::BasicUpdate
 
     attr_reader :upd_low_priority, :upd_ignore, :gen_limit
@@ -108,4 +120,39 @@ class SQLConstructor::BasicUpdate_mysql < SQLConstructor::BasicUpdate
 
 end 
 
- 
+
+##########################################################################################
+#   MySQL dialect descendant of BasicJoin class
+##########################################################################################
+class SQLConstructor::BasicJoin_mysql < SQLConstructor::BasicJoin
+
+    VALID_JOINS = [ "join", "inner_join", "cross_join", "left_join", "right_join", 
+                    "left_outer_join", "right_outer_join",
+                    "natural_join", "natural_left_join", "natural_right_join", 
+                    "natural_left_outer_join", "natural_right_outer_join" ]
+
+    #############################################################################
+    #   Class contructor. Takes a caller object as the first argument, JOIN 
+    #   type as the second argument, and a list of sources for the JOIN clause
+    #############################################################################
+    def initialize ( _caller, type, *sources )
+        type = type.to_s
+        if ! VALID_JOINS.include? type
+            raise NoMethodError, ERR_UNKNOWN_METHOD + ": " + type
+        end
+
+        super
+    end
+
+    #############################################################################
+    #   Returns control to the SQLConstructor object stored in @caller and
+    #   handles INDEX hints.
+    #############################################################################
+    def method_missing ( method, *args )
+         # Handle all *_index calls:
+        return _addIndexes( method, @join_sources, *args )  if method =~ /^[a-z]+_index$/
+        super
+    end
+
+end
+  

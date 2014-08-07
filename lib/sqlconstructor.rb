@@ -2,7 +2,7 @@
 require_relative "sqlobject"
 require_relative "sqlconditional"
 require_relative "sqlexporter"
-require_relative "sqlexception"
+require_relative "sqlerrors"
 
 ##################################################################################################
 #   This class implements methods to construct a valid SQL query.
@@ -73,10 +73,13 @@ class SQLConstructor < SQLObject
         if @obj && @obj.child_caller != @obj
             return @obj.send( method, *args )
         end
-        raise NoMethodError, SQLException::UNKNOWN_METHOD + 
+        raise NoMethodError, ERR_UNKNOWN_METHOD + 
             ": '#{method.to_s}' from #{@obj.class.name}"
     end
     
+    ##########################################################################
+    #   Convert object to string by calling the .export() method of
+    #   the @exporter object.
     ##########################################################################
     def to_s
         return @string  if @string
@@ -128,9 +131,6 @@ class SQLConstructor < SQLObject
         #   *list       - list of sources for the FROM clause
         ##########################################################################
         def initialize ( _caller )
-            @type     = nil
-            @methods  = nil
-            @string   = nil
             @caller   = _caller
             @dialect  = @caller.dialect
             @tidy     = @caller.tidy
@@ -186,9 +186,11 @@ class SQLConstructor < SQLObject
                  # or SQLCondList class:
                 if [ SQLValList, SQLAliasedList, SQLCondList ].include? method_hash[:val]
                     method_hash[:val] = method_hash[:val].new *args
+
                  # Create an array of SQLObjects if [:val] is SQLObject class:
                 elsif method_hash[:val] == SQLObject
                     method_hash[:val] = args.map{ |arg|  SQLObject.get arg }
+
                  # Create an instance of the corresponding class if [:val] is 
                  # SQLConstructor or SQLConditional class:
                 elsif [ SQLConstructor, SQLConditional ].include? method_hash[:val]
@@ -199,6 +201,7 @@ class SQLConstructor < SQLObject
                                                     :caller   => self
                                               )
                     method_hash[:val] = val_obj
+
                  # create a BasicSelect dialect-specific child class: 
                 elsif method_hash[:val].is_a? BasicSelect
                     method_hash[:val] = SQLConstructor.new( 
@@ -206,6 +209,7 @@ class SQLConstructor < SQLObject
                                                             :tidy     => @tidy,
                                                             :exporter => @exporter 
                                                           ).select( *args )
+
                  # If the :val parameter is some different class, then we should 
                  # create an instance of it or return the existing value:
 #                elsif method_hash[:val].is_a? Class
@@ -234,9 +238,12 @@ class SQLConstructor < SQLObject
              # Otherwise send the call to @caller object
             @child_caller = self
             return @caller.send( method.to_sym, *args )  if @caller
-            raise NoMethodError, SQLException::UNKNOWN_METHOD + ": " + method.to_s
+            raise NoMethodError, ERR_UNKNOWN_METHOD + ": " + method.to_s
         end
 
+        ##########################################################################
+        #   Convert object to string by calling the .export() method of
+        #   the @exporter object.
         ##########################################################################
         def to_s
             return @string  if @string
@@ -253,7 +260,7 @@ class SQLConstructor < SQLObject
         def _addJoin ( type, *tables )
             @string = nil
             @gen_joins ||= [ ]
-            join = BasicJoin.new( self, type, *tables )
+            join = _getBasicJoin( type, *tables )
             @gen_joins << join
             return join
         end
@@ -266,7 +273,7 @@ class SQLConstructor < SQLObject
             type = type.to_s
             type.upcase!.gsub! /_/, ' '
             if ! SQLConstructor::VALID_INDEX_HINTS.include? type
-                raise NoMethodError, SQLException::INVALID_INDEX_HINT + ": " + type
+                raise NoMethodError, ERR_INVALID_INDEX_HINT + ": " + type
             end
             @gen_index_hints ||= [ ]
              # set the gen_index_hints for the last object in for_vals
@@ -274,6 +281,19 @@ class SQLConstructor < SQLObject
             @gen_index_hints[last_ind] = { :type => type, :list => SQLObject.get( list ) }
             @string = nil
             return self
+        end
+
+        ##########################################################################
+        #   Returns an instance of BasicJoin_* child dialect-specific class 
+        ##########################################################################
+        def _getBasicJoin ( type, *tables )
+            class_basic = 'BasicJoin'
+            class_child = class_basic +'_' + @dialect
+            begin
+                @obj = SQLConstructor.const_get( class_child ).new self, type, *tables
+            rescue NameError
+                @obj = SQLConstructor.const_get( class_basic ).new self, type, *tables
+            end
         end
        
     end
@@ -344,10 +364,6 @@ class SQLConstructor < SQLObject
 
         attr_reader :join_on, :join_sources, :join_using
 
-        VALID_JOINS = [ "JOIN", "INNER JOIN", "CROSS JOIN", "LEFT JOIN", "RIGHT JOIN", 
-                        "LEFT OUTER JOIN", "RIGHT OUTER_JOIN",
-                        "NATURAL JOIN JOIN", "NATURAL LEFT JOIN", "NATURAL RIGHT JOIN", 
-                        "NATURAL LEFT OUTER JOIN", "NATURAL RIGHT OUTER JOIN" ]
         METHODS = {
             :on    => { :attr => 'join_on',    :name => 'ON',    :val => SQLConditional },
             :using => { :attr => 'join_using', :name => 'USING', :val => SQLObject      },
@@ -360,9 +376,6 @@ class SQLConstructor < SQLObject
         def initialize ( _caller, type, *sources )
             type = type.to_s
             type.upcase!.gsub! /_/, ' '
-            if ! BasicJoin::VALID_JOINS.include? type
-                raise NoMethodError, SQLException::UNKNOWN_METHOD + ": " + type
-            end
   
             super _caller
             @type         = type

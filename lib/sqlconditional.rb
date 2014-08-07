@@ -1,7 +1,4 @@
 
-require_relative 'sqlobject'
-require_relative 'sqlexception'
-
 ##################################################################################################
 #   This class represents an SQL conditional statement.
 #
@@ -44,7 +41,7 @@ class SQLConditional < SQLObject
     #       <tt>cond2 = SQLConditional.new.lt(':c2',5).and.is(cond2)</tt>
     ##########################################################################
     def is ( cond )
-        raise SQLException, SQLException::INVALID_CONDITIONAL  if ! cond.is_a? SQLObject
+        raise SQLException, ERR_INVALID_CONDITIONAL  if ! cond.is_a? SQLObject
         cond.separator = @separator
         @list << cond
         @string = nil
@@ -140,7 +137,7 @@ class SQLConditional < SQLObject
     #############################################################################
     def method_missing ( method, *args )
         return @caller.send( method.to_sym, *args )  if @caller
-        raise SQLException, SQLException::UNKNOWN_METHOD + ": " + method
+        raise SQLException, ERR_UNKNOWN_METHOD + ": " + method
     end
 
 
@@ -183,7 +180,7 @@ class SQLConditional < SQLObject
                         @string = @objects.empty?  ?  " " + @operator + " " 
                                                :  @objects.join( " " + @operator + " " )
                     else
-                        raise SQLException, SQLException::UNKNOWN_OPERATOR_TYPE
+                        raise SQLException, ERR_UNKNOWN_OPERATOR_TYPE
                 end
             end
         end

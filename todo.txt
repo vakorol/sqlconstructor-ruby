@@ -1,6 +1,10 @@
 1. setters for @dialect and @tidy
 3. in BasicJoin:  need method table() to push an object to the @sources list
-7. dialect-specific BasicJoin child classes?
 9. move index hints to child classes?
 13. removal of clauses
-16. rename sqlexception to sqlerrors
+14. SQLAttribute class instead of hashes? ( :attr->:name, :name->:text )
+17. rename Dialect_* classes to Exporter_*
+
+
++ 7. dialect-specific BasicJoin child classes?
++ 16. rename sqlexception to sqlerrors
