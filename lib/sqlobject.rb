@@ -16,7 +16,6 @@ class SQLObject
         @string = self.to_s
     end
 
-
     ##########################################################################
     #   Convert values to the corresponding internal data types
     ##########################################################################
@@ -25,7 +24,9 @@ class SQLObject
             if expr.is_a? SQLObject
                 expr
             elsif expr.is_a? Array or expr.is_a? Range
-                SQLList.new *expr.to_a
+                SQLValList.new *expr.to_a
+            elsif expr.is_a? Hash
+                SQLAliasedList.new expr
             elsif expr.is_a? Symbol
                 SQLColumn.new( expr )
             else
@@ -36,6 +37,26 @@ class SQLObject
          # Return array or scalar, depending on the number of function arguments
         list.length == 1  ?  list[0]  :  list
     end
+
+    ##########################################################################
+    #   Convert a hash of { obj => alias, ... } to an array of SQLObjects
+    #   with defined @alias attribute.
+    ##########################################################################
+    def self.getWithAliases( *list )
+        new_list = [ ]
+         # If list is a hash of objects with aliases:
+        if list.length == 1 && list[0].is_a?( Hash )
+            list.each do |src, _alias|
+                obj = SQLObject.get src
+                obj.alias = _alias
+                new_list << obj
+            end
+         # If list is an array of objects:
+        else
+            new_list = list.map { |src|  SQLObject.get src }
+        end
+        return new_list
+    end 
 
 end
 
@@ -114,21 +135,67 @@ end
 ###############################################################################################
 ###   Class container - a list of SQLValue scalars
 ###############################################################################################
-class SQLList < SQLObject
+class SQLValList < SQLObject
     def initialize ( *list )
         @list = list.map { |item|  SQLObject.get item }
     end
 
     def << ( list )
         list.map! { |item|  SQLObject.get item }
-        @list << list
+        @list += list
     end
 
     def to_s
-        "(" + @list.join( "," ) + ")"
+        return @string  if @string
+        @string = "(" + @list.join( "," ) + ")"
     end
 end
+
+
+###############################################################################################
+###   Class container - a list of SQLObjects with aliases
+###############################################################################################
+class SQLAliasedList < SQLObject
+    def initialize ( *list )
+        @list = _getList *list
+    end
+
+    def << ( *list )
+        @list += _getList *list
+        return self 
+    end
  
+    def to_s
+        return @string  if @string
+        arr = @list.map { |obj|  obj.to_s + ( obj.alias  ? " " + obj.alias.to_s  : "" ) }
+        @string = arr.join ","
+    end
+
+  private
+
+    def _getList ( *list )
+        new_list = [ ]
+         # If list is a hash of objects with aliases:
+        if list.length == 1 && list[0].is_a?( Hash )
+            new_list += _hash2array list[0]
+         # If list is an array of objects:
+        else
+            new_list = list.map { |src|  SQLObject.get src }
+        end
+    end
+
+    def _hash2array ( hash )
+        list = [ ]
+        hash.each do |item, _alias|
+            obj = SQLObject.get item
+            obj.alias = _alias
+            list << obj
+        end
+        return list
+    end
+
+end
+  
 
 ###############################################################################################
 ###

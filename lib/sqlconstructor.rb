@@ -1,6 +1,5 @@
 
 require_relative "sqlobject"
-require_relative "helper"
 require_relative "sqlconditional"
 require_relative "sqlexporter"
 require_relative "sqlexception"
@@ -185,7 +184,7 @@ class SQLConstructor < SQLObject
  
                  # Create an instance of the corresponding class if [:val] is SQLList 
                  # or SQLCondList class:
-                if [ SQLList, SQLCondList ].include? method_hash[:val]
+                if [ SQLValList, SQLAliasedList, SQLCondList ].include? method_hash[:val]
                     method_hash[:val] = method_hash[:val].new *args
                  # Create an array of SQLObjects if [:val] is SQLObject class:
                 elsif method_hash[:val] == SQLObject
@@ -220,7 +219,7 @@ class SQLConstructor < SQLObject
                  # an array or one of the SQL* class containers, then we should rather 
                  # append to it than reassign the value
                 if cur_attr_val.is_a? Array || 
-                   [ SQLList, SQLCondList ].include?( cur_attr_val.class )
+                   [ SQLValList, SQLAliasedList, SQLCondList ].include?( cur_attr_val.class )
                     cur_attr_val << method_hash[:val]
                     method_hash[:val] = cur_attr_val
                 end
@@ -319,7 +318,7 @@ class SQLConstructor < SQLObject
             @sel_expression = {
                                 :attr => 'sel_expression',
                                 :name => '',
-                                :val  => list.map{ |obj|  SQLObject.get obj }
+                                :val  => SQLAliasedList.new( *list )
                               }
         end
 
@@ -354,10 +353,10 @@ class SQLConstructor < SQLObject
             :using => { :attr => 'join_using', :name => 'USING', :val => SQLObject      },
         }
  
-        ##########################################################################
+        #############################################################################
         #   Class contructor. Takes a caller object as the first argument, JOIN 
         #   type as the second argument, and a list of sources for the JOIN clause
-        ##########################################################################
+        #############################################################################
         def initialize ( _caller, type, *sources )
             type = type.to_s
             type.upcase!.gsub! /_/, ' '
@@ -367,7 +366,7 @@ class SQLConstructor < SQLObject
   
             super _caller
             @type         = type
-            @join_sources = Helper.getSources *sources
+            @join_sources = SQLObject.getWithAliases *sources
         end
 
         #############################################################################
@@ -423,7 +422,7 @@ class SQLConstructor < SQLObject
 
         METHODS = {
                     :into    => { :attr => 'ins_into',    :name => 'INTO',    :val => SQLObject },
-                    :values  => { :attr => 'ins_values',  :name => 'VALUES',  :val => SQLList   },
+                    :values  => { :attr => 'ins_values',  :name => 'VALUES',  :val => SQLValList   },
                     :set     => { :attr => 'ins_set',     :name => 'SET',     :val => SQLCondList },
                     :columns => { :attr => 'ins_columns', :name => 'COLUMNS', :val => SQLObject },
                     :select  => { :attr => 'ins_select',  :name => '',        :val => BasicSelect }
@@ -477,5 +476,5 @@ end
 ##################################################################################################
 ##################################################################################################
 
-Dir["./dialects/constructor/*.rb"].each { |file| require file }
+Dir["./dialects/*-constructor.rb"].each { |file| require file }
  

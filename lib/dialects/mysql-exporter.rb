@@ -70,9 +70,6 @@
             super tidy   # ha ha, "super tidy" :)
         end
                     
-
-      ### Overrides of Dialect_generic methods
-
         #############################################################################
         #   Forms a string for the FROM clause from the objects attributes @attr_from
         #   and @attr_index_hints
@@ -80,7 +77,7 @@
         def gen_from ( obj )
             result = ""
             if obj.gen_from
-                result = "FROM " + Helper.to_sWithAliasesIndexes( obj, obj.gen_from[:val] )
+                result = "FROM " + to_sWithAliasesIndexes( obj, obj.gen_from[:val] )
             end
             return result
         end
@@ -93,13 +90,35 @@
             if obj.gen_joins 
                 obj.gen_joins.each do |join|
                     result  = join.type + " " + 
-                              Helper.to_sWithAliasesIndexes( join, join.join_sources )
+                              to_sWithAliasesIndexes( join, join.join_sources )
                     result += self.separator
                     result += "ON " + join.join_on[:val].to_s  if join.join_on
                     arr_joins << result
                 end
             end
             return arr_joins.join( self.separator )
+        end
+
+      ########
+      private
+      ########
+
+        #############################################################################
+        #   Returns a string of objects in list merged with indexes of obj
+        #############################################################################
+        def to_sWithAliasesIndexes ( obj, list )
+            list = [ list ]  if ! [ Array, SQLAliasedList, SQLValList].include? list.class
+            arr  = [ ]
+            list.each_with_index do |item,i|
+                _alias = item.alias ? " " + item.alias.to_d : ""
+                str = item.to_s + _alias
+                if obj.gen_index_hints
+                    index_hash = obj.gen_index_hints[i]
+                    str += " " + index_hash[:type] + " " + index_hash[:list].to_s
+                end
+                arr << str
+            end
+            return arr.join ','
         end
  
     end

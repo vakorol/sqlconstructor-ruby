@@ -1,26 +1,37 @@
 
+##############################################################################################
+#   This class implements the interface for exprting SQLConstructor objects to strings.
+##############################################################################################
 class SQLExporter
 
     attr_accessor :dialect, :tidy
     attr_reader :separator
 
     DEFAULT_DIALECT = :mysql
-    VALID_DIALECTS  = [ 'mysql', 'informix' ]
 
-
+    #############################################################################
+    #   Class constructor. Called with two optional arguments - dialect and tidy.
+    #   Dialect determines the translator class (e.g., Exporter_mysql, 
+    #   Exporter_informix etc). Tidy determines whether the output should be
+    #   formatted and human-readable.
+    #############################################################################
     def initialize ( dialect = DEFAULT_DIALECT, tidy = false )
         dialect ||= DEFAULT_DIALECT
-        if ! VALID_DIALECTS.include? dialect 
+        dialect_class = "Dialect_" + dialect.to_s
+        begin
+            @translator = SQLExporter.const_get( dialect_class ).new( tidy )
+        rescue
             raise NameError, SQLException::UNKNOWN_DIALECT + ": " + dialect.to_s
         end
         @dialect = dialect
         @tidy    = tidy
-        dialect_class = "Dialect_" + dialect.to_s
-        @translator = SQLExporter.const_get( dialect_class ).new( tidy )
         @separator = @translator.separator
     end
 
-
+    #############################################################################
+    #   The main method to export the obj to string. Calls the @translator's 
+    #   export method.
+    #############################################################################
     def export ( obj )
         if obj.is_a? SQLConstructor::GenericQuery
             @translator.export obj
@@ -52,11 +63,10 @@ class SQLExporter
             @separator = @tidy ? "\n" : " "
         end
 
-
         #############################################################################
-        #   Exports a string with a query from object.
-        #   This method should be called from a child class with defined constant
-        #   arrays [SELECT|DELETE|UPDATE|INSERT]_SYNTAX. Methods defined in the array 
+        #   exports a string with a query from object.
+        #   this method should be called from a child class with defined constant
+        #   arrays [select|delete|update|insert]_syntax. methods defined in the array 
         #   are called in the specified order for the object obj.
         #############################################################################
         def export ( obj )
@@ -84,7 +94,7 @@ class SQLExporter
             arr_joins = [ ]
             if obj.gen_joins 
                 obj.gen_joins.each do |join|
-                    result += join.type + " " + Helper.printAliasHash( join.join_sources )
+                    result += join.type + " " + join.join_sources.to_s
                     result += @separator
                     result += "ON " + join.join_on.to_s  if join.join_on
                     arr_joins << result
@@ -106,7 +116,7 @@ class SQLExporter
             if _attr
                 result += _attr[:name]
                 result += ' '  if _attr[:type] != :function
-                if _attr[:val].is_a? SQLList
+                if [ SQLValList, SQLAliasedList ].include? _attr[:val]
                     result += _attr[:val].to_s
                 elsif _attr[:val]
                     _attr[:val] = [ _attr[:val] ]  if ! _attr[:val].is_a? Array
@@ -166,5 +176,5 @@ end
 ##################################################################################################
 ##################################################################################################
 
-Dir["./dialects/exporter/*.rb"].each { |file| require file }
+Dir["./dialects/*-exporter.rb"].each { |file| require file }
  

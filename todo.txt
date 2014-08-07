@@ -2,10 +2,5 @@
 3. in BasicJoin:  need method table() to push an object to the @sources list
 7. dialect-specific BasicJoin child classes?
 9. move index hints to child classes?
-11. move all export rules to dialect-specific GenericQuery child classes
-12. get rid of helper
 13. removal of clauses
-14. separator() -> setSeparator() to set @separator (with attr_reader)
-
-+/-  5. tidy SQLConditional export
-
+16. rename sqlexception to sqlerrors
