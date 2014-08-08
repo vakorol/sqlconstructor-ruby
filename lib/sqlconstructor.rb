@@ -14,7 +14,7 @@ require_relative "sqlerrors"
 class SQLConstructor < SQLObject
 
     attr_accessor :exporter, :tidy
-    attr_reader   :obj, :current_alias, :dialect
+    attr_reader   :obj, :dialect
 
      # Dirty hack to make .join work on an array of SQLConstructors
     alias :to_str :to_s
@@ -159,12 +159,48 @@ class SQLConstructor < SQLObject
             return @methods
         end
 
-        #############################################################################
+        ##########################################################################
+        #   Returns an object by clause (keys of METHODS hash) or by SQLObject.name
+        ##########################################################################
+        def _get ( clause, name = nil )
+            if name && clause == :join
+                _getJoinByName name
+            else
+                super clause
+            end
+        end
+ 
+        ##########################################################################
+        #   Removes attribute by method name (specified in the METHODS constant)
+        #   This method must be ovverriden in child classes if any methods were 
+        #   defined explicitly (not in METHODS).
+        ##########################################################################
+        def _remove ( clause, name = nil )
+            if clause == :join
+                _removeJoinByName name
+            elsif @methods.has_key? clause
+                method_hash = @methods[clause].dup
+                attr_name = method_hash[:attr]
+                self.send "#{attr_name}=", nil
+            end
+            return self
+        end
+
+        ##########################################################################
+        #   Convert object to string by calling the .export() method of
+        #   the @exporter object.
+        ##########################################################################
+        def to_s
+            return @string  if @string
+            @string = @exporter.export self
+        end
+ 
+        ##########################################################################
         #   Process method calls for entities described in METHODS constant array
         #   of the calling object's class.
-        #   If no corresponding entries are found in all object's parent classes, then
-        #   send missing methods calls to the @caller object.
-        #############################################################################
+        #   If no corresponding entries are found in all object's parent classes, 
+        #   then send missing methods calls to the @caller object.
+        ##########################################################################
         def method_missing ( method, *args )
              # If the method is described in the class' METHODS constant hash, then
              # create an instance attribute with the proper name, an attr_reader for
@@ -172,12 +208,12 @@ class SQLConstructor < SQLObject
             if @methods.has_key? method
                 method_hash = @methods[method].dup
                 attr_name = method_hash[:attr]
+                cur_attr = self.send( attr_name.to_sym )
                 val_obj = nil
 
                  # get the current value of the objects attribute {attr_name}
-                if self.respond_to?( attr_name.to_sym ) && 
-                   self.send( attr_name.to_sym ).is_a?( Hash )
-                    cur_attr_val = self.send( attr_name.to_sym )[:val]
+                if self.respond_to?( attr_name.to_sym ) && cur_attr.is_a?( Hash )
+                    cur_attr_val = cur_attr[:val]
                 else
                     cur_attr_val = nil
                 end
@@ -217,13 +253,12 @@ class SQLConstructor < SQLObject
 #                    method_hash[:val] = val_obj
                 end
 
-                method_hash.delete(:attr)
+                method_hash.delete :attr
 
                  # If the object already has attribute {attr_name} defined and it's
                  # an array or one of the SQL* class containers, then we should rather 
                  # append to it than reassign the value
-                if cur_attr_val.is_a? Array || 
-                   [ SQLValList, SQLAliasedList, SQLCondList ].include?( cur_attr_val.class )
+                if [ Array, SQLValList, SQLAliasedList, SQLCondList ].include?( cur_attr_val.class )
                     cur_attr_val << method_hash[:val]
                     method_hash[:val] = cur_attr_val
                 end
@@ -241,18 +276,10 @@ class SQLConstructor < SQLObject
             raise NoMethodError, ERR_UNKNOWN_METHOD + ": " + method.to_s
         end
 
-        ##########################################################################
-        #   Convert object to string by calling the .export() method of
-        #   the @exporter object.
-        ##########################################################################
-        def to_s
-            return @string  if @string
-            @string = @exporter.export self
-        end
 
-     ###########
+      ###########
       protected
-     ###########
+      ###########
 
         ##########################################################################
         #   Creates a new BasicJoin object for the JOIN statement.
@@ -295,7 +322,25 @@ class SQLConstructor < SQLObject
                 @obj = SQLConstructor.const_get( class_basic ).new self, type, *tables
             end
         end
-       
+
+        ##########################################################################
+        #   Returns a named BasicJoin* object by name from @sel_joins array
+        ##########################################################################
+        def _getJoinByName ( name )
+            return nil  if ! @gen_joins || ! name
+            @gen_joins.each { |join|  return join  if join.name == name }
+            return nil
+        end
+
+        ##########################################################################
+        #   Removes a named BasicJoin* object by name from @sel_joins array
+        ##########################################################################
+        def _removeJoinByName ( name )
+            return self  if ! @gen_joins || ! name
+            @gen_joins.delete_if { |join|  join.name == name }
+            return self
+        end
+  
     end
 
 
@@ -304,7 +349,7 @@ class SQLConstructor < SQLObject
   ###############################################################################################
     class BasicSelect < GenericQuery
 
-        attr_reader :sel_expression, :sel_group_by, :sel_unions, :gen_index_hints, 
+        attr_accessor :sel_expression, :sel_group_by, :sel_unions, :gen_index_hints, 
                     :sel_distinction, :sel_having, :sel_group_by_order 
 
         METHODS = {
@@ -317,13 +362,24 @@ class SQLConstructor < SQLObject
                                 :val  => SQLConditional       
                             },
             :group_by  => { :attr => 'sel_group_by', :name => 'GROUP BY',  :val => SQLObject },
-            :group_by_asc  => { :attr => 'sel_group_by_order', :name => 'ASC' },
-            :group_by_desc => { :attr => 'sel_group_by_order', :name => 'DESC' },
-            :union     => { :attr => 'sel_unions',   :name => 'UNION',     :val => SQLConstructor },
-            :union_all => { :attr => 'sel_unions',   :name => 'UNION_ALL', :val => SQLConstructor },
+            :group_by_asc   => { :attr => 'sel_group_by_order', :name => 'ASC' },
+            :group_by_desc  => { :attr => 'sel_group_by_order', :name => 'DESC' },
+            :union          => { 
+                                :attr => 'sel_unions',   
+                                :name => 'UNION',
+                                :val_type => 'list',
+                                :val => SQLConstructor 
+                               },
+            :union_all      => { 
+                                :attr => 'sel_unions',
+                                :name => 'UNION_ALL',
+                                :val_type => 'list',
+                                :val => SQLConstructor
+                               },
             :union_distinct => { 
                                 :attr => 'sel_unions',   
                                 :name => 'UNION_DISTINCT', 
+                                :val_type => 'list',
                                 :val  => SQLConstructor 
                                },
         }
@@ -342,16 +398,67 @@ class SQLConstructor < SQLObject
                               }
         end
 
-        #############################################################################
+        ##########################################################################
+        #   Add more objects to SELECT expression list ( @sel_expression[:val] )
+        ##########################################################################
+        def select_more ( *list )
+            @sel_expression[:val].push *list
+        end
+
+        ##########################################################################
+        #   Returns an object by clause (keys of METHODS hash) or by SQLObject.name
+        ##########################################################################
+        def _get ( clause, name = nil )
+            if name && clause == :union
+                _getUnionByName name
+            else
+                super clause
+            end
+        end
+
+        ##########################################################################
+        #   Deletes an object by clause (keys of METHODS hash) or by SQLObject.name
+        ##########################################################################
+        def _remove ( clause, name = nil )
+            if name && clause == :union
+                _removeUnionByName name
+            else
+                super clause
+            end
+        end
+
+        ##########################################################################
         #   Send missing methods calls to the @caller object, and also handle
         #   JOINs, UNIONs and INDEX hints
-        #############################################################################
+        ##########################################################################
         def method_missing ( method, *args )
              # Handle all [*_]join calls:
-            return _addJoin( method, *args )        if method =~ /^[a-z_]*join$/
-             # Handle all *_index calls:
+            return _addJoin( method, *args )  if method =~ /^[a-z_]*join$/
+              # Handle all *_index calls:
             return _addIndexes( method, @gen_from[:val], *args )  if method =~ /^[a-z]+_index$/
             super
+        end
+
+      #########
+      private
+      #########
+
+        ##########################################################################
+        #   Returns a named SQLConstructor object by name from @sel_unions array
+        ##########################################################################
+        def _getUnionByName ( name )
+            return nil  if ! @sel_unions || ! name
+            @sel_unions.each { |union|  return union  if union.name == name }
+            return nil
+        end
+
+        ##########################################################################
+        #   Removes a named SQLConstructor object by name from @sel_unions array
+        ##########################################################################
+        def _removeUnionByName ( name )
+            return self  if ! @sel_unions || ! name
+            @sel_unions.delete_if { |union|  union[:val].name == name }
+            return self
         end
 
     end
@@ -362,7 +469,7 @@ class SQLConstructor < SQLObject
   ###############################################################################################
     class BasicJoin < GenericQuery
 
-        attr_reader :join_on, :join_sources, :join_using
+        attr_accessor :join_on, :join_sources, :join_using
 
         METHODS = {
             :on    => { :attr => 'join_on',    :name => 'ON',    :val => SQLConditional },
@@ -379,7 +486,11 @@ class SQLConstructor < SQLObject
   
             super _caller
             @type         = type
-            @join_sources = SQLObject.getWithAliases *sources
+            @join_sources = SQLAliasedList.new *sources
+        end
+
+        def join_more ( *sources )
+            @join_sources.push *sources
         end
 
         #############################################################################
@@ -400,7 +511,7 @@ class SQLConstructor < SQLObject
   ###############################################################################################
     class BasicDelete < GenericQuery
 
-        attr_reader :del_using
+        attr_accessor :del_using
 
         METHODS = {
                     :using   => { :attr => 'del_using', :name => 'USING', :val => SQLObject }
@@ -457,7 +568,7 @@ class SQLConstructor < SQLObject
   ###############################################################################################
     class BasicUpdate < GenericQuery
 
-        attr_reader :upd_tables, :upd_set, :gen_where, :gen_order_by
+        attr_accessor :upd_tables, :upd_set, :gen_where, :gen_order_by
 
         METHODS = {
                     :tables  => { :attr => 'upd_tables',  :name => '', :val => SQLObject },
@@ -473,8 +584,15 @@ class SQLConstructor < SQLObject
             @upd_tables = {
                               :attr => 'upd_tables',
                               :name => '',
-                              :val  => list.map{ |obj|  SQLObject.get obj }
+                              :val  => SQLAliasedList.new( *list )
                           }
+        end
+
+        ##########################################################################
+        #   Add tables to UPDATE tables list ( @upd_tables[:val] )
+        ##########################################################################
+        def update_more ( *list )
+            @upd_tables[:val].push *list
         end
 
     end 

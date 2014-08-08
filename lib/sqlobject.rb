@@ -4,15 +4,30 @@
 ###############################################################################################
 class SQLObject
 
-    attr_accessor :alias, :separator
+    attr_accessor :alias, :separator, :name
 
+    ##########################################################################
+    #   Do we really need a constructor here?
+    ##########################################################################
     def initialize
         @string = nil
         @alias  = nil
+        @name   = nil
     end
 
+    ##########################################################################
+    #   Set object's name for further named processing
+    ##########################################################################
+    def _name ( name )
+        @name = name.to_s
+        return self
+    end
 
+    ##########################################################################
+    #   Store string representation in @string after the first call
+    ##########################################################################
     def to_s
+        return @string  if @string
         @string = self.to_s
     end
 
@@ -165,6 +180,18 @@ class SQLAliasedList < SQLObject
         return self 
     end
  
+    def push ( *list )
+        @list += _getList( *list )
+    end
+
+    def length
+        @list.length
+    end
+
+    def each_with_index ( &block )
+        @list.each_with_index &block
+    end
+
     def to_s
         return @string  if @string
         arr = @list.map { |obj|  obj.to_s + ( obj.alias  ? " " + obj.alias.to_s  : "" ) }

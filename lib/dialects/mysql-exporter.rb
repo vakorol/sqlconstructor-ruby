@@ -2,7 +2,7 @@
     #####################################################################################
     #   MySQL dialect translator class.
     #####################################################################################
-    class SQLExporter::Dialect_mysql < SQLExporter::Dialect_generic
+    class SQLExporter::Exporter_mysql < SQLExporter::Exporter_generic
 
         attr_reader :dialect
 

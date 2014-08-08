@@ -17,14 +17,13 @@ class SQLExporter
     #############################################################################
     def initialize ( dialect = DEFAULT_DIALECT, tidy = false )
         dialect ||= DEFAULT_DIALECT
-        dialect_class = "Dialect_" + dialect.to_s
+        dialect_class = "Exporter_" + dialect.to_s
         begin
             @translator = SQLExporter.const_get( dialect_class ).new( tidy )
         rescue
             raise NameError, SQLException::UNKNOWN_DIALECT + ": " + dialect.to_s
         end
-        @dialect = dialect
-        @tidy    = tidy
+        @dialect, @tidy = dialect, tidy
         @separator = @translator.separator
     end
 
@@ -41,23 +40,17 @@ class SQLExporter
     end
 
 
-  ###########################################################################################
-  ############################### INTERNAL CLASSES START HERE ###############################
- 
-    class Dialect_generic
+  ######################################################################################### 
+  #   The exporter class of a 'generic' sql dialect. This should be the parent for
+  #   all dialect-specific exporter classes.
+  ######################################################################################### 
+    class Exporter_generic
 
         attr_reader :separator
 
-         # The main rule for the generic DELETE query syntax
-        DELETE_SYNTAX = [
-                            "DELETE",
-                            :gen_from,
-                            :gen_where,
-                            :gen_order_by,
-                            :gen_limit
-                        ]
- 
-
+        #############################################################################
+        #   Class constructor.
+        #############################################################################
         def initialize ( tidy )
             @tidy = tidy
             @separator = @tidy ? "\n" : " "
@@ -89,7 +82,9 @@ class SQLExporter
             return string
         end
 
- 
+        #############################################################################
+        #   Generic representation of the JOIN clause
+        #############################################################################
         def gen_joins ( obj )
             arr_joins = [ ]
             if obj.gen_joins 
@@ -130,42 +125,38 @@ class SQLExporter
     end
 
  
-  ###########################################################################################
-  #################### INDIVIDUAL DIALECT TRANSLATOR CLASSES START HERE #####################
-  ###########################################################################################  
-
 
 
 
     #####################################################################################
     #   IBM Informix dialect translator class.
     #####################################################################################
-    class Dialect_informix < Dialect_generic
-
-        attr_reader :dialect
-
-
-        def initialize ( tidy )
-            @tidy = tidy
-            @dialect = 'informix'
-            super
-        end
-
-
-        def printSelect ( obj )
-            string = " SELECT "
-            string += " SKIP "  + obj.attr_skip   if obj.attr_skip
-            string += " FIRST " + obj.attr_first  if obj.attr_first
-            string += super
-            string += obj.joins.each{ |join|  printJoin join }       if obj.joins
-            string += " WHERE " + obj.attr_where.to_s                 if obj.attr_where
-            string += " GROUP BY " + obj.attr_group_by.join( ", " )  if obj.attr_group_by
-            string += " ORDER BY " + obj.attr_order_by.join( ", " )  if obj.attr_order_by
-            string += super.printUnion( obj )   if obj.attr_union
-            return string
-        end
-
-    end
+#    class Dialect_informix < Dialect_generic
+#
+#        attr_reader :dialect
+#
+#
+#        def initialize ( tidy )
+#            @tidy = tidy
+#            @dialect = 'informix'
+#            super
+#        end
+#
+#
+#        def printSelect ( obj )
+#            string = " SELECT "
+#            string += " SKIP "  + obj.attr_skip   if obj.attr_skip
+#            string += " FIRST " + obj.attr_first  if obj.attr_first
+#            string += super
+#            string += obj.joins.each{ |join|  printJoin join }       if obj.joins
+#            string += " WHERE " + obj.attr_where.to_s                 if obj.attr_where
+#            string += " GROUP BY " + obj.attr_group_by.join( ", " )  if obj.attr_group_by
+#            string += " ORDER BY " + obj.attr_order_by.join( ", " )  if obj.attr_order_by
+#            string += super.printUnion( obj )   if obj.attr_union
+#            return string
+#        end
+#
+#    end
     
 end
 

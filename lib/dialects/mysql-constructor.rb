@@ -58,9 +58,6 @@ class SQLConstructor::BasicDelete_mysql < SQLConstructor::BasicDelete
     ##########################################################################
     def initialize ( _caller )
         super
-        @attr_ignore = nil
-        @attr_low_priority = nil
-        @attr_quick = nil
     end
 
 end 
