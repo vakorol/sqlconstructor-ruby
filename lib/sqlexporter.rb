@@ -108,15 +108,10 @@ class SQLExporter
             result = ""
 
             _attr = obj.send method
-            if _attr
-                result += _attr[:name]
-                result += ' '  if _attr[:type] != :function
-                if [ SQLValList, SQLAliasedList ].include? _attr[:val]
-                    result += _attr[:val].to_s
-                elsif _attr[:val]
-                    _attr[:val] = [ _attr[:val] ]  if ! _attr[:val].is_a? Array
-                    result += _attr[:val].join ","
-                end
+            if _attr.is_a? Array
+                result += _attr.join @separator
+            elsif _attr
+                result += _attr.to_s
             end
  
             return result

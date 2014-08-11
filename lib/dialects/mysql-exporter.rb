@@ -77,7 +77,7 @@
         def gen_from ( obj )
             result = ""
             if obj.gen_from
-                result = "FROM " + to_sWithAliasesIndexes( obj, obj.gen_from[:val] )
+                result = "FROM " + to_sWithAliasesIndexes( obj, obj.gen_from.val )
             end
             return result
         end
@@ -92,7 +92,7 @@
                     result  = join.type + " " + 
                               to_sWithAliasesIndexes( join, join.join_sources )
                     result += self.separator
-                    result += "ON " + join.join_on[:val].to_s  if join.join_on
+                    result += "ON " + join.join_on.val.to_s  if join.join_on
                     arr_joins << result
                 end
             end

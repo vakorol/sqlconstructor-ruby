@@ -171,6 +171,8 @@ end
 ###   Class container - a list of SQLObjects with aliases
 ###############################################################################################
 class SQLAliasedList < SQLObject
+    attr_writer :no_commas
+
     def initialize ( *list )
         @list = _getList *list
     end
@@ -188,6 +190,10 @@ class SQLAliasedList < SQLObject
         @list.length
     end
 
+    def each ( &block )
+        @list.each &block
+    end
+
     def each_with_index ( &block )
         @list.each_with_index &block
     end
@@ -195,7 +201,8 @@ class SQLAliasedList < SQLObject
     def to_s
         return @string  if @string
         arr = @list.map { |obj|  obj.to_s + ( obj.alias  ? " " + obj.alias.to_s  : "" ) }
-        @string = arr.join ","
+        list_separator = @no_commas  ? ""  : ","
+        @string = arr.join list_separator
     end
 
   private

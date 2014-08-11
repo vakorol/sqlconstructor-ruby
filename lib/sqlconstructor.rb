@@ -95,7 +95,7 @@ class SQLConstructor < SQLObject
     ##########################################################################
     def _getGenericQuery ( type, *args )
         class_basic = 'Basic' + type.capitalize
-        class_child = class_basic +'_' + @dialect
+        class_child = class_basic + '_' + @dialect
         begin
             @obj = self.class.const_get( class_child ).new self, *args
         rescue NameError
@@ -103,6 +103,41 @@ class SQLConstructor < SQLObject
         end
     end
  
+ 
+  ###############################################################################################
+  ###############################################################################################
+    class QAttr
+        
+        attr_reader :name, :text, :val_type, :type, :no_commas
+        attr_accessor :val
+
+        def initialize ( init_hash = nil )
+            if init_hash.is_a? Hash
+                @exporter  = init_hash[:exporter]
+                @name      = init_hash[:name]
+                @text      = init_hash[:text]
+                @val       = init_hash[:val]
+                @val_type  = init_hash[:val_type]
+                @type      = init_hash[:type]
+                @no_commas = init_hash[:no_commas]
+                @separator = @exporter.separator  if @exporter
+            end
+        end
+
+
+        def to_s
+            if [ SQLValList, SQLAliasedList ].include? @val
+                result = @val.to_s
+            elsif @val
+                result = @text + " "
+                val_arr = @val.is_a?( Array )  ? @val  : [ @val ]
+                result += val_arr.join ","
+            end
+            return result
+        end
+
+    end
+
 
   ###############################################################################################
   #   Internal class - generic query attributes and methods. Should be parent to all Basic*
@@ -116,14 +151,16 @@ class SQLConstructor < SQLObject
                     :gen_order_by, :gen_joins, :gen_order_by_order
 
         METHODS = {
-                :from     => { :attr => 'gen_from',  :name => 'FROM',  :val => SQLObject       },
-                :where    => { :attr => 'gen_where', :name => 'WHERE', :val => SQLConditional  },
-                :first    => { :attr => 'gen_first', :name => 'FIRST', :val => SQLObject       },
-                :skip     => { :attr => 'gen_skip',  :name => 'SKIP',  :val => SQLObject       },
-                :order_by => { :attr => 'gen_order_by', :name => 'ORDER BY', :val => SQLObject },
-                :order_by_asc  => { :attr => 'gen_order_by_order', :name => 'ASC' },
-                :order_by_desc => { :attr => 'gen_order_by_order', :name => 'DESC' },
-               }
+                :from     => QAttr.new( :name => 'gen_from',  :text => 'FROM',  :val => SQLObject ),
+                :where    => QAttr.new( :name => 'gen_where', :text => 'WHERE', 
+                                        :val => SQLConditional ),
+                :first    => QAttr.new( :name => 'gen_first', :text => 'FIRST', :val => SQLObject       ),
+                :skip     => QAttr.new( :name => 'gen_skip',  :text => 'SKIP',  :val => SQLObject       ),
+                :order_by => QAttr.new( :name => 'gen_order_by', :text => 'ORDER BY', 
+                                        :val => SQLObject ),
+                :order_by_asc  => QAttr.new( :name => 'gen_order_by_order', :text => 'ASC' ),
+                :order_by_desc => QAttr.new( :name => 'gen_order_by_order', :text => 'DESC' ),
+                  }
  
         ##########################################################################
         #   Class constructor. 
@@ -179,9 +216,8 @@ class SQLConstructor < SQLObject
             if clause == :join
                 _removeJoinByName name
             elsif @methods.has_key? clause
-                method_hash = @methods[clause].dup
-                attr_name = method_hash[:attr]
-                self.send "#{attr_name}=", nil
+                _attr = @methods[clause].dup
+                self.send "#{_attr.name}=", nil
             end
             return self
         end
@@ -206,65 +242,65 @@ class SQLConstructor < SQLObject
              # create an instance attribute with the proper name, an attr_reader for
              # it, and set it's value to the one in METHODS.
             if @methods.has_key? method
-                method_hash = @methods[method].dup
-                attr_name = method_hash[:attr]
-                cur_attr = self.send( attr_name.to_sym )
+                _attr = @methods[method].dup
+                attr_name = _attr.name
+                cur_attr = self.send( _attr.name.to_sym )
                 val_obj = nil
 
-                 # get the current value of the objects attribute {attr_name}
-                if self.respond_to?( attr_name.to_sym ) && cur_attr.is_a?( Hash )
-                    cur_attr_val = cur_attr[:val]
-                else
-                    cur_attr_val = nil
-                end
+                 # get the current value of the objects attribute {_attr.name}
+                cur_attr_val = cur_attr.is_a?( QAttr ) ? cur_attr.val : cur_attr
  
-                 # Create an instance of the corresponding class if [:val] is SQLList 
-                 # or SQLCondList class:
-                if [ SQLValList, SQLAliasedList, SQLCondList ].include? method_hash[:val]
-                    method_hash[:val] = method_hash[:val].new *args
+                 # Create an instance of the corresponding class if _attr.val is 
+                 # SQLList or SQLCondList class:
+                if [ SQLValList, SQLAliasedList, SQLCondList ].include? _attr.val
+                    _attr.val = _attr.val.new *args
 
-                 # Create an array of SQLObjects if [:val] is SQLObject class:
-                elsif method_hash[:val] == SQLObject
-                    method_hash[:val] = args.map{ |arg|  SQLObject.get arg }
+                 # Create an array of SQLObjects if _attr.val is SQLObject class:
+                elsif _attr.val == SQLObject
+                    _attr.val = args.map{ |arg|  SQLObject.get arg }
 
-                 # Create an instance of the corresponding class if [:val] is 
+                 # Create an instance of the corresponding class if _attr.val is 
                  # SQLConstructor or SQLConditional class:
-                elsif [ SQLConstructor, SQLConditional ].include? method_hash[:val]
-                    val_obj = cur_attr_val || method_hash[:val].new(
+                elsif [ SQLConstructor, SQLConditional ].include? _attr.val
+                    val_obj = cur_attr_val || _attr.val.new(
                                                     :dialect  => @dialect,
                                                     :tidy     => @tidy,
                                                     :exporter => @exporter,
                                                     :caller   => self
                                               )
-                    method_hash[:val] = val_obj
+                    _attr.val = val_obj
 
                  # create a BasicSelect dialect-specific child class: 
-                elsif method_hash[:val].is_a? BasicSelect
-                    method_hash[:val] = SQLConstructor.new( 
-                                                            :dialect  => @dialect, 
-                                                            :tidy     => @tidy,
-                                                            :exporter => @exporter 
-                                                          ).select( *args )
+                elsif _attr.val.is_a? BasicSelect
+                    _attr.val = SQLConstructor.new( 
+                                                    :dialect  => @dialect, 
+                                                    :tidy     => @tidy,
+                                                    :exporter => @exporter 
+                                                  ).select( *args )
 
                  # If the :val parameter is some different class, then we should 
                  # create an instance of it or return the existing value:
-#                elsif method_hash[:val].is_a? Class
-#                    val_obj = cur_attr_val || method_hash[:val].new( self )
-#                    method_hash[:val] = val_obj
+                elsif _attr.val.ancestors.include? GenericQuery
+                    val_obj = _getBasicClass( _attr.val, _attr.text )
+                    _attr.val = val_obj
+
                 end
 
-                method_hash.delete :attr
 
-                 # If the object already has attribute {attr_name} defined and it's
-                 # an array or one of the SQL* class containers, then we should rather 
-                 # append to it than reassign the value
-                if [ Array, SQLValList, SQLAliasedList, SQLCondList ].include?( cur_attr_val.class )
-                    cur_attr_val << method_hash[:val]
-                    method_hash[:val] = cur_attr_val
+                 # If the object already has attribute {_attr.name} defined and it's
+                 # an array or one of the SQL* class containers,then we should rather 
+                 # append to it than reassign the value.
+                 # If :attr_val=list, then create a new SQLAliasedList container.
+                if [ Array, SQLValList, SQLAliasedList, SQLCondList ].include?( cur_attr_val.class ) ||
+                   _attr.val_type == 'list'
+                    cur_attr_val ||= SQLAliasedList.new
+                    cur_attr_val.no_commas = true  if _attr.no_commas
+                    cur_attr_val.push _attr.val
+                    _attr = cur_attr_val
                 end
 
                 self.class.send :attr_accessor, attr_name.to_sym  if ! cur_attr_val
-                self.send "#{attr_name}=", method_hash
+                self.send "#{attr_name}=", _attr
 
                 @string = nil
                 return ( val_obj || self )
@@ -286,43 +322,25 @@ class SQLConstructor < SQLObject
         ##########################################################################
         def _addJoin ( type, *tables )
             @string = nil
+            join = _getBasicClass BasicJoin, type, *tables
             @gen_joins ||= [ ]
-            join = _getBasicJoin( type, *tables )
-            @gen_joins << join
+            @gen_joins.push join
             return join
         end
 
         ##########################################################################
-        #   Adds a USE/FORCE/IGNORE INDEX clause for the last objects in for_vals
-        #   argument.
+        #   Returns an instance of Basic* child dialect-specific class 
         ##########################################################################
-        def _addIndexes ( type, for_vals, *list )
-            type = type.to_s
-            type.upcase!.gsub! /_/, ' '
-            if ! SQLConstructor::VALID_INDEX_HINTS.include? type
-                raise NoMethodError, ERR_INVALID_INDEX_HINT + ": " + type
-            end
-            @gen_index_hints ||= [ ]
-             # set the gen_index_hints for the last object in for_vals
-            last_ind = for_vals.length - 1
-            @gen_index_hints[last_ind] = { :type => type, :list => SQLObject.get( list ) }
-            @string = nil
-            return self
-        end
-
-        ##########################################################################
-        #   Returns an instance of BasicJoin_* child dialect-specific class 
-        ##########################################################################
-        def _getBasicJoin ( type, *tables )
-            class_basic = 'BasicJoin'
-            class_child = class_basic +'_' + @dialect
+        def _getBasicClass ( class_basic, *args )
+            class_basic_name = class_basic.name.sub /^(?:\w+::)*/, '' 
+            class_child = class_basic_name + '_' + @dialect
             begin
-                @obj = SQLConstructor.const_get( class_child ).new self, type, *tables
+                self.class.const_get( class_child.to_sym ).new self, *args
             rescue NameError
-                @obj = SQLConstructor.const_get( class_basic ).new self, type, *tables
+                SQLConstructor.const_get( class_basic_name.to_sym ).new self, *args
             end
         end
-
+ 
         ##########################################################################
         #   Returns a named BasicJoin* object by name from @sel_joins array
         ##########################################################################
@@ -345,126 +363,6 @@ class SQLConstructor < SQLObject
 
 
   ###############################################################################################
-  #   Internal class which represents a basic SELECT statement.
-  ###############################################################################################
-    class BasicSelect < GenericQuery
-
-        attr_accessor :sel_expression, :sel_group_by, :sel_unions, :gen_index_hints, 
-                    :sel_distinction, :sel_having, :sel_group_by_order 
-
-        METHODS = {
-            :all         => { :attr => 'sel_distinction', :name => 'ALL'      },
-            :distinct    => { :attr => 'sel_distinction', :name => 'DISTINCT' },
-            :distinctrow => { :attr => 'sel_distinction', :name => 'DISTINCTROW' },
-            :having      => { 
-                                :attr => 'sel_having', 
-                                :name => 'HAVING', 
-                                :val  => SQLConditional       
-                            },
-            :group_by  => { :attr => 'sel_group_by', :name => 'GROUP BY',  :val => SQLObject },
-            :group_by_asc   => { :attr => 'sel_group_by_order', :name => 'ASC' },
-            :group_by_desc  => { :attr => 'sel_group_by_order', :name => 'DESC' },
-            :union          => { 
-                                :attr => 'sel_unions',   
-                                :name => 'UNION',
-                                :val_type => 'list',
-                                :val => SQLConstructor 
-                               },
-            :union_all      => { 
-                                :attr => 'sel_unions',
-                                :name => 'UNION_ALL',
-                                :val_type => 'list',
-                                :val => SQLConstructor
-                               },
-            :union_distinct => { 
-                                :attr => 'sel_unions',   
-                                :name => 'UNION_DISTINCT', 
-                                :val_type => 'list',
-                                :val  => SQLConstructor 
-                               },
-        }
- 
-        ##########################################################################
-        #   Class constructor. 
-        #   _caller     - the caller object
-        #   *list       - list of sources for the FROM clause
-        ##########################################################################
-        def initialize ( _caller, *list )
-            super _caller
-            @sel_expression = {
-                                :attr => 'sel_expression',
-                                :name => '',
-                                :val  => SQLAliasedList.new( *list )
-                              }
-        end
-
-        ##########################################################################
-        #   Add more objects to SELECT expression list ( @sel_expression[:val] )
-        ##########################################################################
-        def select_more ( *list )
-            @sel_expression[:val].push *list
-        end
-
-        ##########################################################################
-        #   Returns an object by clause (keys of METHODS hash) or by SQLObject.name
-        ##########################################################################
-        def _get ( clause, name = nil )
-            if name && clause == :union
-                _getUnionByName name
-            else
-                super clause
-            end
-        end
-
-        ##########################################################################
-        #   Deletes an object by clause (keys of METHODS hash) or by SQLObject.name
-        ##########################################################################
-        def _remove ( clause, name = nil )
-            if name && clause == :union
-                _removeUnionByName name
-            else
-                super clause
-            end
-        end
-
-        ##########################################################################
-        #   Send missing methods calls to the @caller object, and also handle
-        #   JOINs, UNIONs and INDEX hints
-        ##########################################################################
-        def method_missing ( method, *args )
-             # Handle all [*_]join calls:
-            return _addJoin( method, *args )  if method =~ /^[a-z_]*join$/
-              # Handle all *_index calls:
-            return _addIndexes( method, @gen_from[:val], *args )  if method =~ /^[a-z]+_index$/
-            super
-        end
-
-      #########
-      private
-      #########
-
-        ##########################################################################
-        #   Returns a named SQLConstructor object by name from @sel_unions array
-        ##########################################################################
-        def _getUnionByName ( name )
-            return nil  if ! @sel_unions || ! name
-            @sel_unions.each { |union|  return union  if union.name == name }
-            return nil
-        end
-
-        ##########################################################################
-        #   Removes a named SQLConstructor object by name from @sel_unions array
-        ##########################################################################
-        def _removeUnionByName ( name )
-            return self  if ! @sel_unions || ! name
-            @sel_unions.delete_if { |union|  union[:val].name == name }
-            return self
-        end
-
-    end
-
-
-  ###############################################################################################
   #   Internal class which represents a basic JOIN statement.
   ###############################################################################################
     class BasicJoin < GenericQuery
@@ -472,8 +370,8 @@ class SQLConstructor < SQLObject
         attr_accessor :join_on, :join_sources, :join_using
 
         METHODS = {
-            :on    => { :attr => 'join_on',    :name => 'ON',    :val => SQLConditional },
-            :using => { :attr => 'join_using', :name => 'USING', :val => SQLObject      },
+            :on    => QAttr.new( :name => 'join_on',    :text => 'ON',    :val => SQLConditional ),
+            :using => QAttr.new( :name => 'join_using', :text => 'USING', :val => SQLObject      ),
         }
  
         #############################################################################
@@ -507,14 +405,155 @@ class SQLConstructor < SQLObject
 
 
   ###############################################################################################
+  #   Internal class which represents a basic UNION statement.
+  ###############################################################################################
+    class BasicUnion < GenericQuery
+
+        def initialize ( _caller, type )
+            @type   = type
+            super _caller
+            @obj    = SQLConstructor.new( :dialect => @dialect, :tidy => @tidy )
+        end
+
+
+        def to_s
+            @type + @caller.exporter.separator + @obj.to_s
+        end
+
+
+        def method_missing ( method, *args )
+            @obj.send( method, *args )
+        end
+
+    end
+ 
+
+  ###############################################################################################
+  #   Internal class which represents a basic SELECT statement.
+  ###############################################################################################
+    class BasicSelect < GenericQuery
+
+        attr_accessor :sel_expression, :sel_group_by, :sel_unions, :gen_index_hints, 
+                    :sel_distinction, :sel_having, :sel_group_by_order 
+
+        METHODS = {
+            :all         => QAttr.new( :name => 'sel_distinction', :text => 'ALL'         ),
+            :distinct    => QAttr.new( :name => 'sel_distinction', :text => 'DISTINCT'    ),
+            :distinctrow => QAttr.new( :name => 'sel_distinction', :text => 'DISTINCTROW' ),
+            :having      => QAttr.new( :name => 'sel_having', :text => 'HAVING', 
+                                       :val  => SQLConditional ),
+            :group_by    => QAttr.new( :name => 'sel_group_by', :text => 'GROUP BY',  
+                                       :val => SQLObject ),
+            :group_by_asc   => QAttr.new( :name => 'sel_group_by_order', :text => 'ASC'  ),
+            :group_by_desc  => QAttr.new( :name => 'sel_group_by_order', :text => 'DESC' ),
+            :union          => QAttr.new( 
+                                :name     => 'sel_unions',   
+                                :text     => 'UNION',
+                                :val_type => 'list',
+                                :no_commas => true,
+                                :val      => SQLConstructor::BasicUnion
+                               ),
+            :union_all      => QAttr.new(
+                                :name     => 'sel_unions',
+                                :text     => 'UNION_ALL',
+                                :val_type => 'list',
+                                :no_commas => true,
+                                :val      => SQLConstructor::BasicUnion
+                               ),
+            :union_distinct => QAttr.new(
+                                :name     => 'sel_unions',   
+                                :text     => 'UNION_DISTINCT', 
+                                :val_type => 'list',
+                                :no_commas => true,
+                                :val      => SQLConstructor::BasicUnion
+                               ),
+            :join => SQLConstructor::QAttr.new( :name => "gen_joins", :text => "JOIN", 
+                                                :val => SQLConstructor::BasicJoin, 
+                                                :val_type => 'list' )
+        }
+ 
+        ##########################################################################
+        #   Class constructor. 
+        #   _caller     - the caller object
+        #   *list       - list of sources for the FROM clause
+        ##########################################################################
+        def initialize ( _caller, *list )
+            super _caller
+            @sel_expression = QAttr.new(
+                                :name => 'sel_expression',
+                                :text => '',
+                                :val  => SQLAliasedList.new( *list )
+                              )
+        end
+
+        ##########################################################################
+        #   Add more objects to SELECT expression list ( @sel_expression[:val] )
+        ##########################################################################
+        def select_more ( *list )
+            @sel_expression.val.push *list
+        end
+
+        ##########################################################################
+        #   Returns an object by clause (keys of METHODS hash) or by SQLObject.name
+        ##########################################################################
+        def _get ( clause, name = nil )
+            if name && clause == :union
+                _getUnionByName name
+            else
+                super clause
+            end
+        end
+
+        ##########################################################################
+        #   Deletes an object by clause (keys of METHODS hash) or by SQLObject.name
+        ##########################################################################
+        def _remove ( clause, name = nil )
+            if name && clause == :union
+                _removeUnionByName name
+            else
+                super clause
+            end
+        end
+
+
+      #########
+      private
+      #########
+
+        ##########################################################################
+        #   Returns a named SQLConstructor object by name from @sel_unions array
+        ##########################################################################
+        def _getUnionByName ( name )
+            return nil  if ! @sel_unions || ! name
+            @sel_unions.each { |union|  return union  if union.name == name }
+            return nil
+        end
+
+        ##########################################################################
+        #   Removes a named SQLConstructor object by name from @sel_unions array
+        ##########################################################################
+        def _removeUnionByName ( name )
+            return self  if ! @sel_unions || ! name
+            @sel_unions.delete_if { |union|  union.val.name == name }
+            return self
+        end
+
+    end
+
+
+  ###############################################################################################
   #   Internal class which represents a basic DELETE statement.
   ###############################################################################################
     class BasicDelete < GenericQuery
 
         attr_accessor :del_using
 
-        METHODS = {
-                    :using   => { :attr => 'del_using', :name => 'USING', :val => SQLObject }
+        METHODS = { 
+                    :using => QAttr.new( :name => 'del_using', :text => 'USING', 
+                                         :val => SQLObject ),
+                    :join => SQLConstructor::QAttr.new( :name => "gen_joins", :text => "JOIN", 
+                                                        :val => SQLConstructor::BasicJoin, 
+                                                        :val_type => 'list' )
                   }
 
         ##########################################################################
@@ -525,15 +564,6 @@ class SQLConstructor < SQLObject
             super
         end
 
-        #############################################################################
-        #   Handle JOINs or send call to the parent.
-        #############################################################################
-        def method_missing ( method, *args )
-             # Handle all [*_]join calls:
-            return _addJoin( method, *args )  if method =~ /^[a-z_]*join$/
-            super
-        end
- 
     end 
 
 
@@ -545,11 +575,16 @@ class SQLConstructor < SQLObject
         attr_reader :ins_into, :ins_values, :ins_set, :ins_columns, :ins_select
 
         METHODS = {
-                    :into    => { :attr => 'ins_into',    :name => 'INTO',    :val => SQLObject },
-                    :values  => { :attr => 'ins_values',  :name => 'VALUES',  :val => SQLValList   },
-                    :set     => { :attr => 'ins_set',     :name => 'SET',     :val => SQLCondList },
-                    :columns => { :attr => 'ins_columns', :name => 'COLUMNS', :val => SQLObject },
-                    :select  => { :attr => 'ins_select',  :name => '',        :val => BasicSelect }
+                    :into    => QAttr.new( :name => 'ins_into',    :text => 'INTO',    
+                                           :val => SQLObject ),
+                    :values  => QAttr.new( :name => 'ins_values',  :text => 'VALUES',  
+                                           :val => SQLValList ),
+                    :set     => QAttr.new( :name => 'ins_set',     :text => 'SET',     
+                                           :val => SQLCondList ),
+                    :columns => QAttr.new( :name => 'ins_columns', :text => 'COLUMNS', 
+                                           :val => SQLObject ),
+                    :select  => QAttr.new( :name => 'ins_select',  :text => '', 
+                                           :val => BasicSelect )
                   }
  
         ##########################################################################
@@ -571,8 +606,8 @@ class SQLConstructor < SQLObject
         attr_accessor :upd_tables, :upd_set, :gen_where, :gen_order_by
 
         METHODS = {
-                    :tables  => { :attr => 'upd_tables',  :name => '', :val => SQLObject },
-                    :set     => { :attr => 'upd_set',  :name => 'SET', :val => SQLCondList },
+                    :tables => QAttr.new( :name => 'upd_tables', :text => '', :val => SQLObject ),
+                    :set    => QAttr.new( :name => 'upd_set', :text => 'SET', :val => SQLCondList ),
                   }
  
         ##########################################################################
@@ -581,18 +616,15 @@ class SQLConstructor < SQLObject
         ##########################################################################
         def initialize ( _caller, *list )
             super _caller
-            @upd_tables = {
-                              :attr => 'upd_tables',
-                              :name => '',
-                              :val  => SQLAliasedList.new( *list )
-                          }
+            @upd_tables = QAttr.new( :name => 'upd_tables', :text => '',
+                                     :val  => SQLAliasedList.new( *list ) )
         end
 
         ##########################################################################
         #   Add tables to UPDATE tables list ( @upd_tables[:val] )
         ##########################################################################
         def update_more ( *list )
-            @upd_tables[:val].push *list
+            @upd_tables.val.push *list
         end
 
     end 
