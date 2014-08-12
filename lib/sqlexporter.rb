@@ -1,4 +1,3 @@
-
 ##############################################################################################
 #   This class implements the interface for exprting SQLConstructor objects to strings.
 ##############################################################################################
@@ -119,40 +118,6 @@ class SQLExporter
 
     end
 
- 
-
-
-
-    #####################################################################################
-    #   IBM Informix dialect translator class.
-    #####################################################################################
-#    class Dialect_informix < Dialect_generic
-#
-#        attr_reader :dialect
-#
-#
-#        def initialize ( tidy )
-#            @tidy = tidy
-#            @dialect = 'informix'
-#            super
-#        end
-#
-#
-#        def printSelect ( obj )
-#            string = " SELECT "
-#            string += " SKIP "  + obj.attr_skip   if obj.attr_skip
-#            string += " FIRST " + obj.attr_first  if obj.attr_first
-#            string += super
-#            string += obj.joins.each{ |join|  printJoin join }       if obj.joins
-#            string += " WHERE " + obj.attr_where.to_s                 if obj.attr_where
-#            string += " GROUP BY " + obj.attr_group_by.join( ", " )  if obj.attr_group_by
-#            string += " ORDER BY " + obj.attr_order_by.join( ", " )  if obj.attr_order_by
-#            string += super.printUnion( obj )   if obj.attr_union
-#            return string
-#        end
-#
-#    end
-    
 end
 
 ##################################################################################################
@@ -163,4 +128,3 @@ end
 ##################################################################################################
 
 Dir["./dialects/*-exporter.rb"].each { |file| require file }
- 

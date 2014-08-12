@@ -263,4 +263,3 @@ class SQLCondList < SQLObject
         @hash.map{ |k,v| k.to_s + "=" + v.to_s }.join( "," )
     end
 end
- 

@@ -1,4 +1,3 @@
-
 require_relative "sqlobject"
 require_relative "sqlconditional"
 require_relative "sqlexporter"
@@ -316,8 +315,8 @@ class SQLConstructor < SQLObject
         def _getBasicClass ( class_basic, *args )
             class_basic_name = class_basic.name.sub /^(?:\w+::)*/, '' 
             class_child = class_basic_name + '_' + @dialect
-            if self.class.const_defined? class_child.to_sym
-                self.class.const_get( class_child.to_sym ).new self, *args
+            if SQLConstructor.const_defined? class_child.to_sym
+                SQLConstructor.const_get( class_child.to_sym ).new self, *args
             else
                 SQLConstructor.const_get( class_basic_name.to_sym ).new self, *args
             end
@@ -374,16 +373,6 @@ class SQLConstructor < SQLObject
 
         def join_more ( *sources )
             @join_sources.push *sources
-        end
-
-        #############################################################################
-        #   Returns control to the SQLConstructor object stored in @caller and
-        #   handles INDEX hints.
-        #############################################################################
-        def method_missing ( method, *args )
-             # Handle all *_index calls:
-            return _addIndexes( method, @join_sources, *args )  if method =~ /^[a-z]+_index$/
-            super
         end
 
     end
@@ -602,4 +591,3 @@ end
 ##################################################################################################
 
 Dir["./dialects/*-constructor.rb"].each { |file| require file }
- 

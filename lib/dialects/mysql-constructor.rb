@@ -1,6 +1,6 @@
 
-VALID_INDEX_HINTS = [ "use_index", "force_index", "ignore_index", 
-                      "use_key", "ignore_key", "force_key" ]
+VALID_INDEX_HINTS = [ :use_index, :force_index, :ignore_index, 
+                      :use_key, :ignore_key, :force_key ]
  
 ##########################################################################################
 #   MySQL dialect descendant of BasicSelect class
@@ -31,7 +31,7 @@ class SQLConstructor::BasicSelect_mysql < SQLConstructor::BasicSelect
                                                     :text => 'LIMIT', :val => SQLObject ),
                 :group_by_with_rollup => SQLConstructor::QAttr.new( :name => 'sel_group_by_with_rollup', 
                                                     :text => "WITH ROLLUP" ),
-              }
+             }
 
     ##########################################################################
     #   Class constructor. 
@@ -212,6 +212,7 @@ class SQLConstructor::BasicJoin_mysql < SQLConstructor::BasicJoin
     ##########################################################################
     def method_missing ( method, *args )
          # Handle all valid *_index/*_key calls:
+p method
         return _addIndexes( method, *args )  if VALID_INDEX_HINTS.include? method 
         super
     end

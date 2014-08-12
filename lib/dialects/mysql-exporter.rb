@@ -107,7 +107,7 @@
         #   Returns a string of objects in list merged with indexes of obj
         #############################################################################
         def to_sWithAliasesIndexes ( obj, list )
-            list = [ list ]  if ! [ Array, SQLAliasedList, SQLValList].include? list.class
+            list = [ list ]  if ! [ Array, SQLValList, SQLAliasedList ].include? list.class
             arr  = [ ]
             list.each_with_index do |item,i|
                 _alias = item.alias ? " " + item.alias.to_d : ""
