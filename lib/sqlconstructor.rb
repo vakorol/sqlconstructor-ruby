@@ -316,9 +316,9 @@ class SQLConstructor < SQLObject
         def _getBasicClass ( class_basic, *args )
             class_basic_name = class_basic.name.sub /^(?:\w+::)*/, '' 
             class_child = class_basic_name + '_' + @dialect
-            begin
+            if self.class.const_defined? class_child.to_sym
                 self.class.const_get( class_child.to_sym ).new self, *args
-            rescue NameError
+            else
                 SQLConstructor.const_get( class_basic_name.to_sym ).new self, *args
             end
         end
@@ -359,16 +359,16 @@ class SQLConstructor < SQLObject
             :using => QAttr.new( :name => 'join_using', :text => 'USING', :val => SQLObject      ),
         }
  
-        #############################################################################
+        ##########################################################################
         #   Class contructor. Takes a caller object as the first argument, JOIN 
         #   type as the second argument, and a list of sources for the JOIN clause
-        #############################################################################
+        ##########################################################################
         def initialize ( _caller, type, *sources )
             type = type.to_s
             type.upcase!.gsub! /_/, ' '
   
             super _caller
-            @type         = type
+            @type = type
             @join_sources = SQLAliasedList.new *sources
         end
 
@@ -394,20 +394,42 @@ class SQLConstructor < SQLObject
   ###############################################################################################
     class BasicUnion < GenericQuery
 
+        ##########################################################################
+        #   Class contructor. Takes a caller object as the first argument and UNION 
+        #   type as the second argument. Inits @obj to new SQLConstructor instance
+        ##########################################################################
         def initialize ( _caller, type )
-            @type   = type
+            @type = type
             super _caller
-            @obj    = SQLConstructor.new( :dialect => @dialect, :tidy => @tidy )
+            @obj = SQLConstructor.new( :dialect => @dialect, :tidy => @tidy )
         end
 
-
+        ##########################################################################
+        #   Export to string 
+        ##########################################################################
         def to_s
             @type + @caller.exporter.separator + @obj.to_s
         end
 
+        ##########################################################################
+        #   Override GenericQuery method and send call to @obj
+        ##########################################################################
+        def _get ( *args )
+            @obj._get *args
+        end
 
+        ##########################################################################
+        #   Override GenericQuery method and send call to @obj
+        ##########################################################################
+        def _remove ( *args )
+            @obj._get *args
+        end
+ 
+        ##########################################################################
+        #   Send call to @obj
+        ##########################################################################
         def method_missing ( method, *args )
-            @obj.send( method, *args )
+            @obj.send method, *args
         end
 
     end
