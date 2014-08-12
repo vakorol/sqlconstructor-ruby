@@ -19,23 +19,19 @@ class SQLConstructor < SQLObject
      # Dirty hack to make .join work on an array of SQLConstructors
     alias :to_str :to_s
  
-    VALID_INDEX_HINTS = [ "USE INDEX", "FORCE INDEX", "IGNORE INDEX" ]
- 
     ##########################################################################
     #   Class constructor. Accepts an optional argument with a hash of
     #   parameters :dialect and :tidy to set the SQLExporter object in @exporter,
     #   or :exporter to receive a predefined SQLExporter object.
     ##########################################################################
     def initialize ( params = nil )
-        @dialect, @tidy = nil, false
+        @dialect, @string, @obj, @tidy = nil, nil, nil, false
         if params.is_a? Hash
             @dialect  = params[ :dialect  ]
             @tidy     = params[ :tidy     ]
             @exporter = params[ :exporter ]
         end
         @exporter ||= SQLExporter.new @dialect, @tidy
-        @obj     = nil
-        @string  = false
     end
     
     ##########################################################################
@@ -67,12 +63,11 @@ class SQLConstructor < SQLObject
     end
    
     ##########################################################################
-    #   Pass all unknown methods to @obj 
+    #   Pass all unknown methods to @obj
     ##########################################################################
     def method_missing ( method, *args )
-        if @obj && @obj.child_caller != @obj
-            return @obj.send( method, *args )
-        end
+        return @obj.send( method, *args )  if @obj && @obj.child_caller != @obj  
+         # raise an exception if the call is "bouncing" between self and @obj
         raise NoMethodError, ERR_UNKNOWN_METHOD + 
             ": '#{method.to_s}' from #{@obj.class.name}"
     end
@@ -85,6 +80,7 @@ class SQLConstructor < SQLObject
         return @string  if @string
         @string = @exporter.export @obj
     end
+
 
   #########
   private
@@ -113,14 +109,12 @@ class SQLConstructor < SQLObject
 
         def initialize ( init_hash = nil )
             if init_hash.is_a? Hash
-                @exporter  = init_hash[:exporter]
                 @name      = init_hash[:name]
                 @text      = init_hash[:text]
                 @val       = init_hash[:val]
                 @val_type  = init_hash[:val_type]
                 @type      = init_hash[:type]
                 @no_commas = init_hash[:no_commas]
-                @separator = @exporter.separator  if @exporter
             end
         end
 
@@ -159,66 +153,55 @@ class SQLConstructor < SQLObject
                 :order_by => QAttr.new( :name => 'gen_order_by', :text => 'ORDER BY', 
                                         :val => SQLObject ),
                 :order_by_asc  => QAttr.new( :name => 'gen_order_by_order', :text => 'ASC' ),
-                :order_by_desc => QAttr.new( :name => 'gen_order_by_order', :text => 'DESC' ),
+                :order_by_desc => QAttr.new( :name => 'gen_order_by_order', :text => 'DESC' )
                   }
  
         ##########################################################################
         #   Class constructor. 
         #   _caller     - the caller object
-        #   *list       - list of sources for the FROM clause
         ##########################################################################
         def initialize ( _caller )
             @caller   = _caller
             @dialect  = @caller.dialect
             @tidy     = @caller.tidy
             @exporter = _caller.exporter
-            begin
-                @methods = self.getMethods
-            rescue
-                @methods = { }
-            end
-         end
-
-        ##########################################################################
-        #   Returns the METHODS hash of child dialect-specific class merged with
-        #   parent's METHODS hash.
-        ##########################################################################
-        def getMethods
-            if ! @methods
-                methods_self = { }
-                self.class.ancestors.each do |_class| 
-                    next  if ! _class.ancestors.include? SQLConstructor::GenericQuery
-                    class_methods = _class.const_get :METHODS || { }
-                    methods_self.merge! class_methods
-                end
-                @methods = methods_self
-            end
-            return @methods
+            self._setMethods
         end
 
         ##########################################################################
         #   Returns an object by clause (keys of METHODS hash) or by SQLObject.name
         ##########################################################################
-        def _get ( clause, name = nil )
-            if name && clause == :join
-                _getJoinByName name
-            else
-                super clause
-            end
+        def _get ( clause, *args )
+            name = args  ? args[0]  : nil
+            result = nil
+            if @methods.has_key? clause
+                result = self.send @methods[clause].name
+                if name && [ Array, SQLValList, SQLAliasedList, SQLCondList ].include?( result.class )
+                     # return the first object if multiple objects have the same name
+                    result = result.find { |obj|  obj.name == name }
+                end
+            end                         
+            return result
         end
  
         ##########################################################################
-        #   Removes attribute by method name (specified in the METHODS constant)
-        #   This method must be ovverriden in child classes if any methods were 
+        #   NILs attribute by clause name (specified in the METHODS constant), or
+        #   removes an named item from a list attribute.
+        #   This method must be overriden in child classes if any methods were 
         #   defined explicitly (not in METHODS).
         ##########################################################################
-        def _remove ( clause, name = nil )
-            if clause == :join
-                _removeJoinByName name
-            elsif @methods.has_key? clause
-                _attr = @methods[clause].dup
-                self.send "#{_attr.name}=", nil
-            end
+        def _remove ( clause, *args )
+            name = args  ? args[0]  : nil
+            result = nil
+            if @methods.has_key? clause
+                _attr = self.send @methods[clause].name
+                if name && [ Array, SQLValList, SQLAliasedList, SQLCondList ].include?( _attr.class )
+                    _attr.delete_if { |obj|  obj.name == name }
+                else
+                    self.send "#{@methods[clause].name}=", nil
+                end
+                @string = nil
+            end                         
             return self
         end
 
@@ -244,7 +227,7 @@ class SQLConstructor < SQLObject
             if @methods.has_key? method
                 _attr = @methods[method].dup
                 attr_name = _attr.name
-                cur_attr = self.send( _attr.name.to_sym )
+                cur_attr = self.send attr_name.to_sym
                 val_obj = nil
 
                  # get the current value of the objects attribute {_attr.name}
@@ -312,7 +295,6 @@ class SQLConstructor < SQLObject
             raise NoMethodError, ERR_UNKNOWN_METHOD + ": " + method.to_s
         end
 
-
       ###########
       protected
       ###########
@@ -340,23 +322,26 @@ class SQLConstructor < SQLObject
                 SQLConstructor.const_get( class_basic_name.to_sym ).new self, *args
             end
         end
- 
-        ##########################################################################
-        #   Returns a named BasicJoin* object by name from @sel_joins array
-        ##########################################################################
-        def _getJoinByName ( name )
-            return nil  if ! @gen_joins || ! name
-            @gen_joins.each { |join|  return join  if join.name == name }
-            return nil
-        end
 
         ##########################################################################
-        #   Removes a named BasicJoin* object by name from @sel_joins array
+        #   Returns the METHODS hash of child dialect-specific class merged with
+        #   parent's METHODS hash.
         ##########################################################################
-        def _removeJoinByName ( name )
-            return self  if ! @gen_joins || ! name
-            @gen_joins.delete_if { |join|  join.name == name }
-            return self
+        def _setMethods
+            if ! @methods
+                methods_self = { }
+                self.class.ancestors.each do |_class| 
+                    next  if ! _class.ancestors.include? SQLConstructor::GenericQuery
+                    begin
+                        class_methods = _class.const_get :METHODS || { }
+                    rescue
+                        class_methods = { }
+                    end
+                    methods_self.merge! class_methods
+                end
+                @methods = methods_self
+            end
+            return @methods
         end
   
     end
@@ -491,51 +476,6 @@ class SQLConstructor < SQLObject
         ##########################################################################
         def select_more ( *list )
             @sel_expression.val.push *list
-        end
-
-        ##########################################################################
-        #   Returns an object by clause (keys of METHODS hash) or by SQLObject.name
-        ##########################################################################
-        def _get ( clause, name = nil )
-            if name && clause == :union
-                _getUnionByName name
-            else
-                super clause
-            end
-        end
-
-        ##########################################################################
-        #   Deletes an object by clause (keys of METHODS hash) or by SQLObject.name
-        ##########################################################################
-        def _remove ( clause, name = nil )
-            if name && clause == :union
-                _removeUnionByName name
-            else
-                super clause
-            end
-        end
-
-
-      #########
-      private
-      #########
-
-        ##########################################################################
-        #   Returns a named SQLConstructor object by name from @sel_unions array
-        ##########################################################################
-        def _getUnionByName ( name )
-            return nil  if ! @sel_unions || ! name
-            @sel_unions.each { |union|  return union  if union.name == name }
-            return nil
-        end
-
-        ##########################################################################
-        #   Removes a named SQLConstructor object by name from @sel_unions array
-        ##########################################################################
-        def _removeUnionByName ( name )
-            return self  if ! @sel_unions || ! name
-            @sel_unions.delete_if { |union|  union.val.name == name }
-            return self
         end
 
     end

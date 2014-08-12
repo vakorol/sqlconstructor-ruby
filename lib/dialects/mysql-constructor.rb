@@ -1,4 +1,7 @@
 
+VALID_INDEX_HINTS = [ "use_index", "force_index", "ignore_index", 
+                      "use_key", "ignore_key", "force_key" ]
+ 
 ##########################################################################################
 #   MySQL dialect descendant of BasicSelect class
 ##########################################################################################
@@ -7,11 +10,15 @@ class SQLConstructor::BasicSelect_mysql < SQLConstructor::BasicSelect
     attr_reader :sel_high_priority, :sel_straight_join, :sel_sql_result_size, 
                 :sel_sql_cache, :sel_sql_calc_found_rows, :gen_limit, :sel_group_by_with_rollup
 
-    METHODS = {
-                :straight_join => SQLConstructor::QAttr.new( :name => 'sel_straight_join', :text => 'STRAIGHT_JOIN' ),
-                :sql_cache     => SQLConstructor::QAttr.new( :name => 'sel_sql_cache',     :text => 'SQL_CACHE'     ),
-                :sql_no_cache  => SQLConstructor::QAttr.new( :name => 'sel_sql_cache',     :text => 'SQL_NO_CACHE'  ),
-                :high_priority => SQLConstructor::QAttr.new( :name => 'sel_high_priority', :text => 'HIGH_PRIORITY' ),
+   METHODS = {
+                :straight_join => SQLConstructor::QAttr.new( :name => 'sel_straight_join', 
+                                                             :text => 'STRAIGHT_JOIN' ),
+                :sql_cache     => SQLConstructor::QAttr.new( :name => 'sel_sql_cache',
+                                                             :text => 'SQL_CACHE'     ),
+                :sql_no_cache  => SQLConstructor::QAttr.new( :name => 'sel_sql_cache',
+                                                             :text => 'SQL_NO_CACHE'  ),
+                :high_priority => SQLConstructor::QAttr.new( :name => 'sel_high_priority',
+                                                             :text => 'HIGH_PRIORITY' ),
                 :sql_calc_found_rows  => SQLConstructor::QAttr.new( :name => 'sel_sql_calc_found_rows', 
                                                     :text => 'SQL_CALC_FOUND_ROWS' ),
                 :sql_small_result     => SQLConstructor::QAttr.new( :name => 'sel_sql_result_size', 
@@ -20,8 +27,8 @@ class SQLConstructor::BasicSelect_mysql < SQLConstructor::BasicSelect
                                                     :text => 'SQL_BIG_RESULT' ),
                 :sql_buffer_result    => SQLConstructor::QAttr.new( :name => 'sel_sql_result_size', 
                                                     :text => 'SQL_BUFFER_RESULT' ),
-                :limit                => SQLConstructor::QAttr.new( :name => 'gen_limit', :text => 'LIMIT', 
-                                                    :val => SQLObject ),
+                :limit                => SQLConstructor::QAttr.new( :name => 'gen_limit', 
+                                                    :text => 'LIMIT', :val => SQLObject ),
                 :group_by_with_rollup => SQLConstructor::QAttr.new( :name => 'sel_group_by_with_rollup', 
                                                     :text => "WITH ROLLUP" ),
               }
@@ -36,35 +43,36 @@ class SQLConstructor::BasicSelect_mysql < SQLConstructor::BasicSelect
     end
 
     ##########################################################################
-    #   Adds a USE/FORCE/IGNORE INDEX clause for the last objects in for_vals
-    #   argument.
-    ##########################################################################
-    def _addIndexes ( type, for_vals, *list )
-        type = type.to_s
-        type.upcase!.gsub! /_/, ' '
-        if ! SQLConstructor::VALID_INDEX_HINTS.include? type
-            raise NoMethodError, ERR_INVALID_INDEX_HINT + ": " + type
-        end
-        @gen_index_hints ||= [ ]
-         # set the gen_index_hints for the last object in for_vals
-        last_ind = for_vals.length - 1
-        @gen_index_hints[last_ind] = { :type => type, :list => SQLObject.get( list ) }
-        @string = nil
-        return self
-    end
-
-    ##########################################################################
     #   Send missing methods calls to the @caller object, and also handle
     #   JOINs, UNIONs and INDEX hints
     ##########################################################################
     def method_missing ( method, *args )
          # Handle all [*_]join calls:
         return _addJoin( method, *args )  if method =~ /^[a-z_]*join$/
-          # Handle all *_index calls:
-        return _addIndexes( method, @gen_from.val, *args )  if method =~ /^[a-z]+_index$/
+          # Handle all valid *_index/*_key calls:
+        return _addIndexes( method, *args )  if VALID_INDEX_HINTS.include? method 
         super
     end
-   
+
+  #########
+  private
+  #########
+
+    ##########################################################################
+    #   Adds a USE/FORCE/IGNORE INDEX clause for the last objects in for_vals
+    #   argument.
+    ##########################################################################
+    def _addIndexes ( type, *list )
+        type = type.to_s
+        type.upcase!.gsub! /_/, ' '
+        @gen_index_hints ||= [ ]
+         # set the gen_index_hints for the last object in for_vals
+        last_ind = @gen_from.val.length - 1
+        @gen_index_hints[last_ind] = { :type => type, :list => SQLObject.get( list ) }
+        @string = nil
+        return self
+    end
+    
 end
 
 
@@ -76,11 +84,12 @@ class SQLConstructor::BasicDelete_mysql < SQLConstructor::BasicDelete
     attr_reader :del_ignore, :del_quick, :del_low_priority, :gen_limit
 
     METHODS = {
-                :low_priority => SQLConstructor::QAttr.new( :name => 'del_low_priority', :text => 'LOW_PRIORITY' ),
+                :low_priority => SQLConstructor::QAttr.new( :name => 'del_low_priority', 
+                                                            :text => 'LOW_PRIORITY' ),
                 :quick        => SQLConstructor::QAttr.new( :name => 'del_quick',  :text => 'QUICK ' ),
                 :ignore       => SQLConstructor::QAttr.new( :name => 'del_ignore', :text => 'IGNORE' ),
                 :limit        => SQLConstructor::QAttr.new( :name => 'gen_limit',  :text => 'LIMIT', 
-                                            :val => SQLObject )
+                                                            :val => SQLObject )
               }
  
     ##########################################################################
@@ -91,9 +100,9 @@ class SQLConstructor::BasicDelete_mysql < SQLConstructor::BasicDelete
         super
     end
 
-    #############################################################################
+    ##########################################################################
     #   Handle JOINs or send call to the parent.
-    #############################################################################
+    ##########################################################################
     def method_missing ( method, *args )
          # Handle all [*_]join calls:
         return _addJoin( method, *args )  if method =~ /^[a-z_]*join$/
@@ -142,9 +151,12 @@ class SQLConstructor::BasicUpdate_mysql < SQLConstructor::BasicUpdate
     attr_reader :upd_low_priority, :upd_ignore, :gen_limit
 
     METHODS = {
-               :low_priority => SQLConstructor::QAttr.new( :name => 'upd_low_priority', :text => 'LOW_PRIORITY' ),
-               :ignore       => SQLConstructor::QAttr.new( :name => 'upd_ignore',       :text => 'IGNORE',      ),
-               :limit   => SQLConstructor::QAttr.new( :name => 'gen_limit', :text => 'LIMIT', :val => SQLObject )
+               :low_priority => SQLConstructor::QAttr.new( :name => 'upd_low_priority', 
+                                                           :text => 'LOW_PRIORITY' ),
+               :ignore       => SQLConstructor::QAttr.new( :name => 'upd_ignore',
+                                                           :text => 'IGNORE',      ),
+               :limit   => SQLConstructor::QAttr.new( :name => 'gen_limit', :text => 'LIMIT', 
+                                                      :val => SQLObject )
               }
 
     ##########################################################################
@@ -168,16 +180,15 @@ class SQLConstructor::BasicJoin_mysql < SQLConstructor::BasicJoin
                     "natural_join", "natural_left_join", "natural_right_join", 
                     "natural_left_outer_join", "natural_right_outer_join" ]
 
-    #############################################################################
+    ##########################################################################
     #   Class contructor. Takes a caller object as the first argument, JOIN 
     #   type as the second argument, and a list of sources for the JOIN clause
-    #############################################################################
+    ##########################################################################
     def initialize ( _caller, type, *sources )
         type = type.to_s
         if ! VALID_JOINS.include? type
             raise NoMethodError, ERR_UNKNOWN_METHOD + ": " + type
         end
-
         super
     end
 
@@ -185,27 +196,23 @@ class SQLConstructor::BasicJoin_mysql < SQLConstructor::BasicJoin
     #   Adds a USE/FORCE/IGNORE INDEX clause for the last objects in for_vals
     #   argument.
     ##########################################################################
-    def _addIndexes ( type, for_vals, *list )
+    def _addIndexes ( type, *list )
         type = type.to_s
         type.upcase!.gsub! /_/, ' '
-        if ! SQLConstructor::VALID_INDEX_HINTS.include? type
-            raise NoMethodError, ERR_INVALID_INDEX_HINT + ": " + type
-        end
         @gen_index_hints ||= [ ]
          # set the gen_index_hints for the last object in for_vals
-        last_ind = for_vals.length - 1
+        last_ind = @join_sources.length - 1
         @gen_index_hints[last_ind] = { :type => type, :list => SQLObject.get( list ) }
         @string = nil
         return self
     end
 
-    #############################################################################
-    #   Returns control to the SQLConstructor object stored in @caller and
-    #   handles INDEX hints.
-    #############################################################################
+    ##########################################################################
+    #   Handles INDEX hints or sends the call to the parent
+    ##########################################################################
     def method_missing ( method, *args )
-         # Handle all *_index calls:
-        return _addIndexes( method, @join_sources, *args )  if method =~ /^[a-z]+_index$/
+         # Handle all valid *_index/*_key calls:
+        return _addIndexes( method, *args )  if VALID_INDEX_HINTS.include? method 
         super
     end
 

@@ -194,6 +194,22 @@ class SQLAliasedList < SQLObject
         @list.each &block
     end
 
+    def delete_if ( &block )
+        @list.delete_if &block
+    end
+ 
+    def [] (i)
+        @list[i]
+    end
+
+    def find ( &block )
+        @list.find &block
+    end
+
+    def select ( &block )
+        @list.each &block
+    end
+
     def each_with_index ( &block )
         @list.each_with_index &block
     end
