@@ -31,11 +31,7 @@ class SQLExporter
     #   export method.
     #############################################################################
     def export ( obj )
-        if obj.is_a? SQLConstructor::GenericQuery
-            @translator.export obj
-        else
-            obj.to_s
-        end
+        @translator.export obj
     end
 
 
@@ -66,7 +62,7 @@ class SQLExporter
             begin
                 rules = self.class.const_get( rules_const_name.to_sym )
             rescue NameError
-                raise NameError, SQLException::INVALID_RULES + " '" + self.send( :dialect ) + "'"
+                raise NameError, ERR_INVALID_RULES + " '" + self.send( :dialect ) + "'"
             end
             string = ""
             rules.each do |rule|
@@ -87,12 +83,7 @@ class SQLExporter
         def gen_joins ( obj )
             arr_joins = [ ]
             if obj.gen_joins 
-                obj.gen_joins.each do |join|
-                    result += join.type + " " + join.join_sources.to_s
-                    result += @separator
-                    result += "ON " + join.join_on.to_s  if join.join_on
-                    arr_joins << result
-                end
+                arr_joins = obj.gen_joins.map { |join|  join.to_s }
             end
             return arr_joins.join( @separator )
         end
@@ -128,3 +119,4 @@ end
 ##################################################################################################
 
 Dir["./dialects/*-exporter.rb"].each { |file| require file }
+

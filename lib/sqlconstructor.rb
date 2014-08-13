@@ -214,26 +214,26 @@ class SQLConstructor < SQLObject
         end
  
         ##########################################################################
-        #   Process method calls for entities described in METHODS constant array
+        #   Process method calls for clauses described in METHODS constant array
         #   of the calling object's class.
         #   If no corresponding entries are found in all object's parent classes, 
         #   then send missing methods calls to the @caller object.
         ##########################################################################
         def method_missing ( method, *args )
              # If the method is described in the class' METHODS constant hash, then
-             # create an instance attribute with the proper name, an attr_reader for
-             # it, and set it's value to the one in METHODS.
+             # create an instance attribute with the proper name, an attr_accessor
+             # for it, and set it's value to the one in METHODS.
             if @methods.has_key? method
                 _attr = @methods[method].dup
                 attr_name = _attr.name
-                cur_attr = self.send attr_name.to_sym
                 val_obj = nil
 
-                 # get the current value of the objects attribute {_attr.name}
-                cur_attr_val = cur_attr.is_a?( QAttr ) ? cur_attr.val : cur_attr
+                 # get the current value of the attribute {_attr.name}
+                cur_attr = self.send attr_name.to_sym
+                cur_attr_val = cur_attr.is_a?( QAttr )  ? cur_attr.val  : cur_attr
  
                  # Create an instance of the corresponding class if _attr.val is 
-                 # SQLList or SQLCondList class:
+                 # on of SQLObject container classes:
                 if [ SQLValList, SQLAliasedList, SQLCondList ].include? _attr.val
                     _attr.val = _attr.val.new *args
 

@@ -82,23 +82,6 @@
             return result
         end
 
-        #############################################################################
-        #   Forms a string for all JOINs for an object. Index hints included.
-        #############################################################################
-        def gen_joins ( obj )
-            arr_joins = [ ]
-            if obj.gen_joins 
-                obj.gen_joins.each do |join|
-                    result  = join.type + " " + 
-                              to_sWithAliasesIndexes( join, join.join_sources )
-                    result += self.separator
-                    result += "ON " + join.join_on.val.to_s  if join.join_on
-                    arr_joins << result
-                end
-            end
-            return arr_joins.join( self.separator )
-        end
-
       ########
       private
       ########

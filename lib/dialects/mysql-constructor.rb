@@ -120,11 +120,16 @@ class SQLConstructor::BasicInsert_mysql < SQLConstructor::BasicInsert
     attr_reader :ins_priority, :ins_quick, :ins_ignore, :ins_on_duplicate_key_update
 
     METHODS = {
-                :low_priority  => SQLConstructor::QAttr.new( :name => 'ins_priority', :text => 'LOW_PRIORITY'  ),
-                :delayed       => SQLConstructor::QAttr.new( :name => 'ins_priority', :text => 'DELAYED'       ),
-                :high_priority => SQLConstructor::QAttr.new( :name => 'ins_priority', :text => 'HIGH_PRIORITY' ),
-                :quick         => SQLConstructor::QAttr.new( :name => 'ins_quick',    :text => 'QUICK'         ),
-                :ignore        => SQLConstructor::QAttr.new( :name => 'ins_ignore',   :text => 'IGNORE'        ),
+                :low_priority  => SQLConstructor::QAttr.new( :name => 'ins_priority', 
+                                                             :text => 'LOW_PRIORITY'  ),
+                :delayed       => SQLConstructor::QAttr.new( :name => 'ins_priority', 
+                                                             :text => 'DELAYED'       ),
+                :high_priority => SQLConstructor::QAttr.new( :name => 'ins_priority', 
+                                                             :text => 'HIGH_PRIORITY' ),
+                :quick         => SQLConstructor::QAttr.new( :name => 'ins_quick',    
+                                                             :text => 'QUICK'         ),
+                :ignore        => SQLConstructor::QAttr.new( :name => 'ins_ignore',   
+                                                             :text => 'IGNORE'        ),
                 :on_duplicate_key_update => SQLConstructor::QAttr.new( 
                                               :name => 'ins_on_duplicate_key_update', 
                                               :text => 'ON DUPLICATE KEY UPDATE',
@@ -208,14 +213,46 @@ class SQLConstructor::BasicJoin_mysql < SQLConstructor::BasicJoin
     end
 
     ##########################################################################
+    #   Export to string with index hints included
+    ##########################################################################
+    def to_s
+        return @string  if @string
+        result  = @type + " " + to_sWithAliasesIndexes( @join_sources )
+        result += @exporter.separator
+        result += "ON " + @join_on.val.to_s  if @join_on
+        @string = result
+    end
+ 
+    ##########################################################################
     #   Handles INDEX hints or sends the call to the parent
     ##########################################################################
     def method_missing ( method, *args )
          # Handle all valid *_index/*_key calls:
-p method
         return _addIndexes( method, *args )  if VALID_INDEX_HINTS.include? method 
         super
     end
 
+  ########
+  private
+  ########
+
+    ##########################################################################
+    #   Returns a string of objects in list merged with @gen_index_hints
+    ##########################################################################
+    def to_sWithAliasesIndexes ( list )
+        list = [ list ]  if ! [ Array, SQLValList, SQLAliasedList ].include? list.class
+        arr  = [ ]
+        list.each_with_index do |item,i|
+            _alias = item.alias ? " " + item.alias.to_s : ""
+            str = item.to_s + _alias
+            if @gen_index_hints
+                index_hash = @gen_index_hints[i]
+                str += " " + index_hash[:type] + " " + index_hash[:list].to_s
+            end
+            arr << str
+        end
+        return arr.join ','
+    end
+ 
 end
   
