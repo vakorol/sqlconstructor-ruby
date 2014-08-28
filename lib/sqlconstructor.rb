@@ -146,24 +146,10 @@ class SQLConstructor < SQLObject
     class GenericQuery < SQLObject
 
         attr_accessor :caller
-        attr_reader :type, :dialect, :exporter, :child_caller, :tidy, 
-                    :gen_where, :gen_from, :gen_index_hints, :gen_first, :gen_skip, 
-                    :gen_order_by, :gen_joins, :gen_order_by_order
+        attr_reader :type, :dialect, :exporter, :child_caller, :tidy, :gen_index_hints
 
          # Dirty hack to make .join work on an array of GenericQueries
         alias :to_str :to_s
- 
-        METHODS = {
-                :from     => QAttr.new( :name => 'gen_from',  :text => 'FROM',  :val => SQLObject ),
-                :where    => QAttr.new( :name => 'gen_where', :text => 'WHERE', 
-                                        :val => SQLConditional ),
-                :first    => QAttr.new( :name => 'gen_first', :text => 'FIRST', :val => SQLObject       ),
-                :skip     => QAttr.new( :name => 'gen_skip',  :text => 'SKIP',  :val => SQLObject       ),
-                :order_by => QAttr.new( :name => 'gen_order_by', :text => 'ORDER BY', 
-                                        :val => SQLObject ),
-                :order_by_asc  => QAttr.new( :name => 'gen_order_by_order', :text => 'ASC' ),
-                :order_by_desc => QAttr.new( :name => 'gen_order_by_order', :text => 'DESC' )
-                  }
  
         ##########################################################################
         #   Class constructor. 
@@ -254,7 +240,6 @@ class SQLConstructor < SQLObject
                  # Create an array of SQLObjects if _attr.val is SQLObject class:
                 elsif _attr.val == SQLObject
                     _attr.val = SQLObject.get *args #args.map{ |arg|  SQLObject.get arg }
-#                    p _attr.val[0].inline  if method == :from && _attr.val.class == SQLAliasedList
 
                  # Create an instance of the corresponding class if _attr.val is 
                  # SQLConstructor or SQLConditional class:
@@ -445,7 +430,7 @@ class SQLConstructor < SQLObject
         #   Override GenericQuery method and send call to @obj
         ##########################################################################
         def _remove ( *args )
-            @obj._get *args
+            @obj._remove *args
         end
  
         ##########################################################################
@@ -464,9 +449,13 @@ class SQLConstructor < SQLObject
     class BasicSelect < GenericQuery
 
         attr_accessor :sel_expression, :sel_group_by, :sel_unions, :gen_index_hints, 
-                      :sel_distinction, :sel_having, :sel_group_by_order 
+                      :sel_distinction, :sel_having, :sel_group_by_order, :gen_where, :gen_from,
+                      :gen_first, :gen_skip, :gen_order_by, :gen_order_by_order, :gen_joins
 
         METHODS = {
+            :where    => QAttr.new( :name => 'gen_where', :text => 'WHERE', 
+                                        :val => SQLConditional ),
+            :from     => QAttr.new( :name => 'gen_from',  :text => 'FROM',  :val => SQLObject ),
             :all         => QAttr.new( :name => 'sel_distinction', :text => 'ALL'         ),
             :distinct    => QAttr.new( :name => 'sel_distinction', :text => 'DISTINCT'    ),
             :distinctrow => QAttr.new( :name => 'sel_distinction', :text => 'DISTINCTROW' ),
@@ -499,7 +488,13 @@ class SQLConstructor < SQLObject
                                ),
             :join => SQLConstructor::QAttr.new( :name => "gen_joins", :text => "JOIN", 
                                                 :val => SQLConstructor::BasicJoin, 
-                                                :val_type => 'list' )
+                                                :val_type => 'list' ),
+            :first    => QAttr.new( :name => 'gen_first', :text => 'FIRST', :val => SQLObject ),
+            :skip     => QAttr.new( :name => 'gen_skip',  :text => 'SKIP',  :val => SQLObject ),
+            :order_by => QAttr.new( :name => 'gen_order_by', :text => 'ORDER BY', 
+                                    :val => SQLObject ),
+            :order_by_asc  => QAttr.new( :name => 'gen_order_by_order', :text => 'ASC' ),
+            :order_by_desc => QAttr.new( :name => 'gen_order_by_order', :text => 'DESC' )
         }
  
         ##########################################################################
@@ -531,14 +526,24 @@ class SQLConstructor < SQLObject
   ###############################################################################################
     class BasicDelete < GenericQuery
 
-        attr_accessor :del_using
+        attr_accessor :del_using, :gen_where, :gen_from, :gen_skip, :gen_first, :gen_order_by,
+                      :gen_order_by_order
 
         METHODS = { 
                     :using => QAttr.new( :name => 'del_using', :text => 'USING', 
                                          :val => SQLObject ),
                     :join => SQLConstructor::QAttr.new( :name => "gen_joins", :text => "JOIN", 
                                                         :val => SQLConstructor::BasicJoin, 
-                                                        :val_type => 'list' )
+                                                        :val_type => 'list' ),
+                    :where => QAttr.new( :name => 'gen_where', :text => 'WHERE', 
+                                         :val => SQLConditional ),
+                    :from  => QAttr.new( :name => 'gen_from',  :text => 'FROM',  :val => SQLObject ),
+                    :first => QAttr.new( :name => 'gen_first', :text => 'FIRST', :val => SQLObject ),
+                    :skip  => QAttr.new( :name => 'gen_skip',  :text => 'SKIP',  :val => SQLObject ),
+                    :order_by => QAttr.new( :name => 'gen_order_by', :text => 'ORDER BY', 
+                                            :val => SQLObject ),
+                    :order_by_asc  => QAttr.new( :name => 'gen_order_by_order', :text => 'ASC' ),
+                    :order_by_desc => QAttr.new( :name => 'gen_order_by_order', :text => 'DESC' )
                   }
 
         ##########################################################################
@@ -560,16 +565,12 @@ class SQLConstructor < SQLObject
         attr_reader :ins_into, :ins_values, :ins_set, :ins_columns, :ins_select
 
         METHODS = {
-                    :into    => QAttr.new( :name => 'ins_into',    :text => 'INTO',    
-                                           :val => SQLObject ),
-                    :values  => QAttr.new( :name => 'ins_values',  :text => 'VALUES',  
-                                           :val => SQLValList ),
-                    :set     => QAttr.new( :name => 'ins_set',     :text => 'SET',     
-                                           :val => SQLCondList ),
-                    :columns => QAttr.new( :name => 'ins_columns', :text => 'COLUMNS', 
-                                           :val => SQLObject ),
-                    :select  => QAttr.new( :name => 'ins_select',  :text => '', 
-                                           :val => BasicSelect )
+                  :into => QAttr.new( :name => 'ins_into', :text => 'INTO', :val => SQLObject ),
+                  :values => QAttr.new( :name => 'ins_values', :text => 'VALUES', :val => SQLValList),
+                  :set => QAttr.new( :name => 'ins_set', :text => 'SET', :val => SQLCondList ),
+                  :columns => QAttr.new( :name => 'ins_columns', :text => 'COLUMNS', 
+                                         :val => SQLObject ),
+                  :select => QAttr.new( :name => 'ins_select', :text => '', :val => BasicSelect )
                   }
  
         ##########################################################################
@@ -588,11 +589,15 @@ class SQLConstructor < SQLObject
   ###############################################################################################
     class BasicUpdate < GenericQuery
 
-        attr_accessor :upd_tables, :upd_set, :gen_where, :gen_order_by
+        attr_accessor :upd_tables, :upd_set, :gen_where, :gen_order_by, :gen_first, :gen_skip
 
         METHODS = {
                     :tables => QAttr.new( :name => 'upd_tables', :text => '', :val => SQLObject ),
                     :set    => QAttr.new( :name => 'upd_set', :text => 'SET', :val => SQLCondList ),
+                    :where  => QAttr.new( :name => 'gen_where', :text => 'WHERE', 
+                                          :val => SQLConditional ),
+                    :first  => QAttr.new( :name => 'gen_first', :text => 'FIRST', :val => SQLObject ),
+                    :skip   => QAttr.new( :name => 'gen_skip',  :text => 'SKIP',  :val => SQLObject ),
                   }
  
         ##########################################################################

@@ -22,6 +22,11 @@ class SQLConstructorTest < Test::Unit::TestCase
         assert_equal "DELETE\nFROM keywords\nWHERE \n(keyword_id IN \n(SELECT\n id\nFROM \n(SELECT\n k.keyword id\nFROM keywords k\nWHERE \n(k.keyword_type = 'CAMPAIGN'  AND k.keyword != 'Airtel'  AND k.keyword != 'Nokia'  AND k.keyword != 'Micromax'  AND k.keyword NOT IN \n(SELECT\nDISTINCT\n keyword_id\nFROM customer_analysis\n))\nORDER BY k.keyword_id\n) a\n))\n",
                      delete1
     end
+
+    def test_update1
+        assert_equal "UPDATE\n guest g\nSET link_id=\n(SELECT\n MAX(h.host_id)\nFROM guest_data d\nINNER JOIN host_data h\nON \n(d.guest_nm = hhost_nm)\nWHERE \n(d.guest_id = g.guest_id)\nGROUP BY h.venue_nm\nHAVING \n(COUNT(*) = 1)\n)\nWHERE \n(g.guest_id IN \n(SELECT\n d.guest_id\nFROM guest_data d\nINNER JOIN host_data h\nON \n(d.guest_nm = hhost_nm)\nGROUP BY h.venue_nm\nHAVING \n(COUNT(*) = 1)\n))\n",
+                     update1
+    end
  
     def select1
         sql = SQLConstructor.new( :tidy => true, :dialect => 'mysql' )
@@ -67,6 +72,20 @@ class SQLConstructorTest < Test::Unit::TestCase
                      and.not_in( :"k.keyword", inner_sel3 ).order_by( :"k.keyword_id" )
         inner_sel1 = SQLConstructor.new( :tidy => true, :dialect => 'mysql' ).select( :id ).from( inner_sel2 => :a )
         sql.delete.from( :keywords ).where.in( :keyword_id, inner_sel1 )
+        sql.to_s
+    end
+
+    def update1
+        sql = SQLConstructor.new( :tidy => true, :dialect => 'mysql' )
+        in_sel1 = SQLConstructor.new( :tidy => true )
+        in_sel1.select( :"MAX(h.host_id)" ).from( :guest_data => :d ).
+                  inner_join( :host_data => :h ).on.eq( :"d.guest_nm", :hhost_nm ).where. 
+                  eq( :"d.guest_id", :"g.guest_id" ).group_by( :"h.venue_nm" ).having.eq( :"COUNT(*)", 1 )
+        in_sel2 = SQLConstructor.new( :dialect => 'mysql', :tidy => true )
+        in_sel2.select( :"d.guest_id" ).from( :guest_data => :d ).
+                  inner_join( :host_data => :h ).on.eq( :"d.guest_nm", :hhost_nm ).
+                  group_by( :"h.venue_nm" ).having.eq( :"COUNT(*)", 1 )
+        sql.update( :guest => :g ).set( :link_id => in_sel1).where.in( :"g.guest_id", in_sel2 )
         sql.to_s
     end
  
