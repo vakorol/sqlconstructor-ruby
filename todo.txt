@@ -1,7 +1,0 @@
-
-11. setters for @dialect and @tidy
-
-- 8. throw exceptions in _get and _remove
-+ (!) 21. Redo _get and _remove
-+ 22. USE/IGNORE/FORCE KEY in mysql_constructor
-+ 23. move VALID_INDEX_HINTS to mysql_constructor

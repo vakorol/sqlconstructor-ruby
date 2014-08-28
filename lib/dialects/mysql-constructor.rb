@@ -48,7 +48,7 @@ class SQLConstructor::BasicSelect_mysql < SQLConstructor::BasicSelect
     ##########################################################################
     def method_missing ( method, *args )
          # Handle all [*_]join calls:
-        return _addJoin( method, *args )  if method =~ /^[a-z_]*join$/
+        return _addJoin( method, *args )  if method.to_s =~ /^[a-z_]*join$/
           # Handle all valid *_index/*_key calls:
         return _addIndexes( method, *args )  if VALID_INDEX_HINTS.include? method 
         super
@@ -133,7 +133,7 @@ class SQLConstructor::BasicInsert_mysql < SQLConstructor::BasicInsert
                 :on_duplicate_key_update => SQLConstructor::QAttr.new( 
                                               :name => 'ins_on_duplicate_key_update', 
                                               :text => 'ON DUPLICATE KEY UPDATE',
-                                              :val  => SQLConditional,
+                                              :val  => SQLConditional
                                             )
               }
 
@@ -159,7 +159,7 @@ class SQLConstructor::BasicUpdate_mysql < SQLConstructor::BasicUpdate
                :low_priority => SQLConstructor::QAttr.new( :name => 'upd_low_priority', 
                                                            :text => 'LOW_PRIORITY' ),
                :ignore       => SQLConstructor::QAttr.new( :name => 'upd_ignore',
-                                                           :text => 'IGNORE',      ),
+                                                           :text => 'IGNORE' ),
                :limit   => SQLConstructor::QAttr.new( :name => 'gen_limit', :text => 'LIMIT', 
                                                       :val => SQLObject )
               }

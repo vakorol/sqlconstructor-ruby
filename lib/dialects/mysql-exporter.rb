@@ -93,7 +93,7 @@
             list = [ list ]  if ! [ Array, SQLValList, SQLAliasedList ].include? list.class
             arr  = [ ]
             list.each_with_index do |item,i|
-                _alias = item.alias ? " " + item.alias.to_d : ""
+                _alias = item.alias ? " " + item.alias.to_s : ""
                 str = item.to_s + _alias
                 if obj.gen_index_hints
                     index_hash = obj.gen_index_hints[i]

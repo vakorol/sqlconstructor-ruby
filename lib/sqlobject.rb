@@ -4,7 +4,7 @@
 ###############################################################################################
 class SQLObject
 
-    attr_accessor :alias, :separator, :name
+    attr_accessor :alias, :separator, :name, :inline
 
     ##########################################################################
     #   Do we really need a constructor here?
@@ -13,6 +13,7 @@ class SQLObject
         @string = nil
         @alias  = nil
         @name   = nil
+        @inline = nil
     end
 
     ##########################################################################
@@ -51,6 +52,10 @@ class SQLObject
     def self.get ( *list )
         list.map! do |expr|
             if expr.is_a? SQLObject
+                 # inline queries go in parens:
+                if expr.class == SQLConstructor || expr.is_a?( SQLConstructor::GenericQuery )
+                    expr.inline = true
+                end
                 expr
             elsif expr.is_a? Array or expr.is_a? Range
                 SQLValList.new *expr.to_a
@@ -67,25 +72,25 @@ class SQLObject
         list.length == 1  ?  list[0]  :  list
     end
 
-    ##########################################################################
-    #   Convert a hash of { obj => alias, ... } to an array of SQLObjects
-    #   with defined @alias attribute.
-    ##########################################################################
-    def self.getWithAliases( *list )
-        new_list = [ ]
-         # If list is a hash of objects with aliases:
-        if list.length == 1 && list[0].is_a?( Hash )
-            list.each do |src, _alias|
-                obj = SQLObject.get src
-                obj.alias = _alias
-                new_list << obj
-            end
-         # If list is an array of objects:
-        else
-            new_list = list.map { |src|  SQLObject.get src }
-        end
-        return new_list
-    end 
+#    ##########################################################################
+#    #   Convert a hash of { obj => alias, ... } to an array of SQLObjects
+#    #   with defined @alias attribute.
+#    ##########################################################################
+#    def self.getWithAliases( *list )
+#        new_list = [ ]
+#         # If list is a hash of objects with aliases:
+#        if list.length == 1 && list[0].is_a?( Hash )
+#            list.each do |src, _alias|
+#                obj = SQLObject.get src
+#                obj.alias = _alias
+#                new_list << obj
+#            end
+#         # If list is an array of objects:
+#        else
+#            new_list = list.map { |src|  SQLObject.get src }
+#        end
+#        return new_list
+#    end 
 
 end
 
@@ -96,7 +101,7 @@ end
 class SQLColumn < SQLObject
 
     def initialize ( col = nil )
-        @name = col.is_a?( SQLColumn )  ?  col.name  :  _prepareName( col )
+        @name = col.is_a?( SQLColumn )  ?  col.name  :  col #_prepareName( col )
     end
 
     ##########################################################################

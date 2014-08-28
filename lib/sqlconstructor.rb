@@ -1,7 +1,10 @@
-require_relative "sqlobject"
-require_relative "sqlconditional"
-require_relative "sqlexporter"
-require_relative "sqlerrors"
+
+DIALECTS_PATH = File.expand_path( "../dialects", __FILE__ )
+ 
+require File.expand_path( "../sqlobject", __FILE__ )
+require File.expand_path( "../sqlconditional", __FILE__ )
+require File.expand_path( "../sqlexporter", __FILE__ )
+require File.expand_path( "../sqlerrors", __FILE__ )
 
 ##################################################################################################
 #   This class implements methods to construct a valid SQL query.
@@ -31,6 +34,7 @@ class SQLConstructor < SQLObject
             @exporter = params[ :exporter ]
         end
         @exporter ||= SQLExporter.new @dialect, @tidy
+        @dialect = @exporter.dialect
     end
     
     ##########################################################################
@@ -77,6 +81,7 @@ class SQLConstructor < SQLObject
     ##########################################################################
     def to_s
         return @string  if @string
+        @obj.inline = self.inline
         @string = @exporter.export @obj
     end
 
@@ -108,12 +113,12 @@ class SQLConstructor < SQLObject
 
         def initialize ( init_hash = nil )
             if init_hash.is_a? Hash
-                @name      = init_hash[:name]
-                @text      = init_hash[:text]
-                @val       = init_hash[:val]
-                @val_type  = init_hash[:val_type]
-                @type      = init_hash[:type]
-                @no_commas = init_hash[:no_commas]
+                @name           = init_hash[:name]
+                @text           = init_hash[:text]
+                @val            = init_hash[:val]
+                @val_type       = init_hash[:val_type]
+                @type           = init_hash[:type]
+                @no_commas      = init_hash[:no_commas]
             end
         end
 
@@ -121,10 +126,12 @@ class SQLConstructor < SQLObject
         def to_s
             if [ SQLValList, SQLAliasedList ].include? @val
                 result = @val.to_s
-            elsif @val
-                result = @text + " "
-                val_arr = @val.is_a?( Array )  ? @val  : [ @val ]
-                result += val_arr.join ","
+            else 
+                result = @text
+                if @val
+                    val_arr = @val.is_a?( Array )  ? @val  : [ @val ]
+                    result += " " + val_arr.join( "," )
+                end
             end
             return result
         end
@@ -143,6 +150,9 @@ class SQLConstructor < SQLObject
                     :gen_where, :gen_from, :gen_index_hints, :gen_first, :gen_skip, 
                     :gen_order_by, :gen_joins, :gen_order_by_order
 
+         # Dirty hack to make .join work on an array of GenericQueries
+        alias :to_str :to_s
+ 
         METHODS = {
                 :from     => QAttr.new( :name => 'gen_from',  :text => 'FROM',  :val => SQLObject ),
                 :where    => QAttr.new( :name => 'gen_where', :text => 'WHERE', 
@@ -164,6 +174,7 @@ class SQLConstructor < SQLObject
             @dialect  = @caller.dialect
             @tidy     = @caller.tidy
             @exporter = _caller.exporter
+            @inline   = @caller.inline
             self._setMethods
         end
 
@@ -175,6 +186,7 @@ class SQLConstructor < SQLObject
             result = nil
             if @methods.has_key? clause
                 result = self.send @methods[clause].name
+                result = result.val  if result.is_a? QAttr
                 if name && [ Array, SQLValList, SQLAliasedList, SQLCondList ].include?( result.class )
                      # return the first object if multiple objects have the same name
                     result = result.find { |obj|  obj.name == name }
@@ -211,6 +223,7 @@ class SQLConstructor < SQLObject
         def to_s
             return @string  if @string
             @string = @exporter.export self
+            return @string
         end
  
         ##########################################################################
@@ -220,8 +233,8 @@ class SQLConstructor < SQLObject
         #   then send missing methods calls to the @caller object.
         ##########################################################################
         def method_missing ( method, *args )
-             # If the method is described in the class' METHODS constant hash, then
-             # create an instance attribute with the proper name, an attr_accessor
+             # If the method is described in the class' METHODS constant, then
+             # create an attribute with the proper name, an attr_accessor
              # for it, and set it's value to the one in METHODS.
             if @methods.has_key? method
                 _attr = @methods[method].dup
@@ -229,6 +242,7 @@ class SQLConstructor < SQLObject
                 val_obj = nil
 
                  # get the current value of the attribute {_attr.name}
+                self.class.send :attr_accessor, attr_name.to_sym
                 cur_attr = self.send attr_name.to_sym
                 cur_attr_val = cur_attr.is_a?( QAttr )  ? cur_attr.val  : cur_attr
  
@@ -239,7 +253,8 @@ class SQLConstructor < SQLObject
 
                  # Create an array of SQLObjects if _attr.val is SQLObject class:
                 elsif _attr.val == SQLObject
-                    _attr.val = args.map{ |arg|  SQLObject.get arg }
+                    _attr.val = SQLObject.get *args #args.map{ |arg|  SQLObject.get arg }
+#                    p _attr.val[0].inline  if method == :from && _attr.val.class == SQLAliasedList
 
                  # Create an instance of the corresponding class if _attr.val is 
                  # SQLConstructor or SQLConditional class:
@@ -253,21 +268,20 @@ class SQLConstructor < SQLObject
                     _attr.val = val_obj
 
                  # create a BasicSelect dialect-specific child class: 
-                elsif _attr.val.is_a? BasicSelect
-                    _attr.val = SQLConstructor.new( 
+                elsif _attr.val == BasicSelect
+                    val_obj = SQLConstructor.new( 
                                                     :dialect  => @dialect, 
                                                     :tidy     => @tidy,
                                                     :exporter => @exporter 
-                                                  ).select( *args )
+                                                ).select( *args )
+                    _attr.val = val_obj
 
                  # If the :val parameter is some different class, then we should 
                  # create an instance of it or return the existing value:
-                elsif _attr.val.ancestors.include? GenericQuery
+                elsif _attr.val && _attr.val.ancestors.include?( GenericQuery )
                     val_obj = _getBasicClass( _attr.val, _attr.text )
                     _attr.val = val_obj
-
                 end
-
 
                  # If the object already has attribute {_attr.name} defined and it's
                  # an array or one of the SQL* class containers,then we should rather 
@@ -281,7 +295,7 @@ class SQLConstructor < SQLObject
                     _attr = cur_attr_val
                 end
 
-                self.class.send :attr_accessor, attr_name.to_sym  if ! cur_attr_val
+#                self.class.send :attr_accessor, attr_name.to_sym  if ! cur_attr_val
                 self.send "#{attr_name}=", _attr
 
                 @string = nil
@@ -365,14 +379,34 @@ class SQLConstructor < SQLObject
         def initialize ( _caller, type, *sources )
             type = type.to_s
             type.upcase!.gsub! /_/, ' '
-  
             super _caller
             @type = type
             @join_sources = SQLAliasedList.new *sources
         end
 
+        ##########################################################################
+        #   Adds more sources to @join_sources list
+        ##########################################################################
         def join_more ( *sources )
             @join_sources.push *sources
+        end
+
+        ##########################################################################
+        #   Export to string with sources aliases
+        ##########################################################################
+        def to_s
+            return @string  if @string
+            result  = @type + " "
+            arr = [ ]
+            @join_sources.each do |src|
+                _alias = src.alias ? " " + src.alias.to_s : ""
+                str = src.to_s + _alias
+                arr << str
+            end
+            result += arr.join ','
+            result += @exporter.separator
+            result += "ON " + @join_on.val.to_s  if @join_on
+            @string = result
         end
 
     end
@@ -430,7 +464,7 @@ class SQLConstructor < SQLObject
     class BasicSelect < GenericQuery
 
         attr_accessor :sel_expression, :sel_group_by, :sel_unions, :gen_index_hints, 
-                    :sel_distinction, :sel_having, :sel_group_by_order 
+                      :sel_distinction, :sel_having, :sel_group_by_order 
 
         METHODS = {
             :all         => QAttr.new( :name => 'sel_distinction', :text => 'ALL'         ),
@@ -590,4 +624,5 @@ end
 ##################################################################################################
 ##################################################################################################
 
-Dir["./dialects/*-constructor.rb"].each { |file| require file }
+Dir[ DIALECTS_PATH + "/*-constructor.rb"].each { |file|  require file }
+

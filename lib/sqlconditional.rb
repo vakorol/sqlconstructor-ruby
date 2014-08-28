@@ -49,68 +49,76 @@ class SQLConditional < SQLObject
     end
 
     ##########################################################################
+    #   Same as .is(), but negated
+    ##########################################################################
+    def not_is ( cond )
+        self.not( cond )
+    end
+ 
+    ##########################################################################
     #    Negates the following conditional statement.
     ##########################################################################
-    def not ( expr )
-        _addBasicCond( :NOT, BasicCond::LHS )
+    def not ( *expr )
+        _addBasicCond( :NOT, BasicCond::LHS, *expr )
     end
-
 
     def and
         _addBasicCond( :AND, BasicCond::MIDDLE )
     end
 
-
     def or
         _addBasicCond( :OR, BasicCond::MIDDLE )
     end
-
 
     def eq ( expr1, expr2 )
         _addBasicCond( :'=', BasicCond::MIDDLE, expr1, expr2 )
     end
 
-
     def ne ( expr1, expr2 )
         _addBasicCond( :'!=', BasicCond::MIDDLE, expr1, expr2 )
     end
- 
 
     def gt ( expr1, expr2 )
         _addBasicCond( :'>', BasicCond::MIDDLE, expr1, expr2 )
     end
 
-
     def lt ( expr1, expr2 )
         _addBasicCond( :'<', BasicCond::MIDDLE, expr1, expr2 )
     end
-
 
     def gte ( expr1, expr2 ) 
         _addBasicCond( :'>=', BasicCond::MIDDLE, expr1, expr2 )
     end
 
-
     def lte ( expr1, expr2 ) 
         _addBasicCond( :'<=', BasicCond::MIDDLE, expr1, expr2 )
     end
-
 
     def is_null ( expr )
         _addBasicCond( :'IS NULL', BasicCond::RHS, SQLObject.get( expr ) )
     end
 
-
+    def is_not_null ( expr )
+        _addBasicCond( :'IS NOT NULL', BasicCond::RHS, SQLObject.get( expr ) )
+    end
+ 
     def in ( expr1, expr2 ) 
         _addBasicCond( :'IN', BasicCond::MIDDLE, expr1, expr2 )
     end
 
-
+    def not_in ( expr1, expr2 ) 
+        _addBasicCond( :'NOT IN', BasicCond::MIDDLE, expr1, expr2 )
+    end
+ 
     def like ( expr1, expr2 )
         _addBasicCond( :'LIKE', BasicCond::MIDDLE, expr1, expr2 )
     end
 
+    def not_like ( expr1, expr2 )
+        _addBasicCond( :'NOT LIKE', BasicCond::MIDDLE, expr1, expr2 )
+    end
 
+ 
     def to_s
         return @string  if @string
         @string = @separator
@@ -125,19 +133,16 @@ class SQLConditional < SQLObject
         return @string
     end
 
-
     #############################################################################
-    #   This magic method is used to return control to the SQLConstructor object
-    #   stored in @caller from the SQLConditional object derived by the .where()
-    #   method of the SQLConstructor class. This allows mixing the methods of the
-    #   two classes, i.e.:  
+    #   Return control to the object stored in @caller. 
+    #   This allows mixing the methods different classes, i.e.:  
     #       <tt>SQLConstructor.new.select(':a').from('tab').where.eq(':b',3).limit(5)</tt>
-    #   Here .where.eq() returns an SQLConditional object, but further application
+    #   Here .where.eq() returns an SQLConditional object, but further usage
     #   of the foreign method .limit() returns back to the SQLConstructor object.
     #############################################################################
     def method_missing ( method, *args )
         return @caller.send( method.to_sym, *args )  if @caller
-        raise SQLException, ERR_UNKNOWN_METHOD + ": " + method
+        raise NoMethodError, ERR_UNKNOWN_METHOD + ": " + method.to_s
     end
 
 
@@ -167,7 +172,7 @@ class SQLConditional < SQLObject
 
         def to_s
             return @string  if @string
-                @string = " "
+            @string = " "
             if @objects.empty?
                 @string += " " + @operator + " "
             else
@@ -177,10 +182,10 @@ class SQLConditional < SQLObject
                     when RHS
                         @string = @objects[0].to_s + " " + @operator
                     when MIDDLE 
-                        @string = @objects.empty?  ?  " " + @operator + " " 
-                                               :  @objects.join( " " + @operator + " " )
+                        @string = @objects.empty?  ?  " " + @operator + " "  
+                                                   :  @objects.join( " " + @operator + " " )
                     else
-                        raise SQLException, ERR_UNKNOWN_OPERATOR_TYPE
+                        raise NameError, ERR_UNKNOWN_OPERATOR_TYPE
                 end
             end
         end

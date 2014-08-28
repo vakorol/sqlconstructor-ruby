@@ -1,3 +1,4 @@
+
 ##############################################################################################
 #   This class implements the interface for exprting SQLConstructor objects to strings.
 ##############################################################################################
@@ -6,7 +7,7 @@ class SQLExporter
     attr_accessor :dialect, :tidy
     attr_reader :separator
 
-    DEFAULT_DIALECT = :mysql
+    DEFAULT_DIALECT = 'mysql'
 
     #############################################################################
     #   Class constructor. Called with two optional arguments - dialect and tidy.
@@ -20,7 +21,7 @@ class SQLExporter
         begin
             @translator = SQLExporter.const_get( dialect_class ).new( tidy )
         rescue
-            raise NameError, SQLException::UNKNOWN_DIALECT + ": " + dialect.to_s
+            raise NameError, ERR_UNKNOWN_DIALECT + ": " + dialect.to_s
         end
         @dialect, @tidy = dialect, tidy
         @separator = @translator.separator
@@ -31,7 +32,9 @@ class SQLExporter
     #   export method.
     #############################################################################
     def export ( obj )
-        @translator.export obj
+        string = @translator.export obj
+        string = @separator + "(" + string + ")"  if obj.inline
+        return string
     end
 
 
@@ -96,7 +99,6 @@ class SQLExporter
             obj = args[0]
             return ''  if ! obj.is_a? SQLObject
             result = ""
-
             _attr = obj.send method
             if _attr.is_a? Array
                 result += _attr.join @separator
@@ -118,5 +120,5 @@ end
 ##################################################################################################
 ##################################################################################################
 
-Dir["./dialects/*-exporter.rb"].each { |file| require file }
-
+Dir[ DIALECTS_PATH + "/*-exporter.rb"].each { |file|  require file }
+ 
