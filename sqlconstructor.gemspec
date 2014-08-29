@@ -6,10 +6,7 @@ Gem::Specification.new do |s|
   s.description = "A gem for constructing custom SQL queries via an object-oriented interface"
   s.authors     = ["Vasiliy Korol"]
   s.email       = 'vakorol@mail.ru'
-  s.files       = ["lib/sqlconstructor.rb","lib/sqlobject.rb","lib/sqlexporter.rb","lib/sqlerrors.rb",
-                   "lib/sqlconditional.rb","lib/dialects/mysql-constructor.rb",
-                   "lib/dialects/mysql-exporter.rb","lib/dialects/example-constructor.rb",
-                   "test/queries.rb", "Rakefile", "Readme.md" ]
+  s.files       = [ Dir.glob("{lib,test,doc}/**/*"), "Rakefile", "Readme.md", "license.txt" ]
   s.homepage    = 'https://github.com/vakorol/sqlconstructor-ruby'
-  s.license     = 'GPL'
+  s.license     = 'MIT'
 end
