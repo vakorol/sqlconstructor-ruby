@@ -1,0 +1,797 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+
+  <title>Class: SQLConstructor::GenericQuery</title>
+
+  <link rel="stylesheet" href="../rdoc.css" type="text/css" media="screen" />
+
+  <script src="../js/jquery.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../js/thickbox-compressed.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../js/quicksearch.js" type="text/javascript" charset="utf-8"></script>
+  <script src="../js/darkfish.js" type="text/javascript" charset="utf-8"></script>
+
+</head>
+<body id="top" class="class">
+
+  <div id="metadata">
+    <div id="home-metadata">
+      <div id="home-section" class="section">
+        <h3 class="section-header">
+          <a href="../index.html">Home</a>
+          <a href="../index.html#classes">Classes</a>
+          <a href="../index.html#methods">Methods</a>
+        </h3>
+      </div>
+    </div>
+
+    <div id="file-metadata">
+      <div id="file-list-section" class="section">
+        <h3 class="section-header">In Files</h3>
+        <div class="section-body">
+          <ul>
+          
+            <li><a href="../lib/sqlconstructor_rb.html?TB_iframe=true&amp;height=550&amp;width=785"
+              class="thickbox" title="lib/sqlconstructor.rb">lib/sqlconstructor.rb</a></li>
+          
+          </ul>
+        </div>
+      </div>
+
+      
+    </div>
+
+    <div id="class-metadata">
+      
+      <!-- Parent Class -->
+      <div id="parent-class-section" class="section">
+        <h3 class="section-header">Parent</h3>
+        
+        <p class="link"><a href="../SQLObject.html">SQLObject</a></p>
+        
+      </div>
+      
+
+      
+
+      
+
+      
+      <!-- Method Quickref -->
+      <div id="method-list-section" class="section">
+        <h3 class="section-header">Methods</h3>
+        <ul class="link-list">
+          
+          <li><a href="#method-c-new">::new</a></li>
+          
+          <li><a href="#method-i-_addJoin">#_addJoin</a></li>
+          
+          <li><a href="#method-i-_get">#_get</a></li>
+          
+          <li><a href="#method-i-_getBasicClass">#_getBasicClass</a></li>
+          
+          <li><a href="#method-i-_remove">#_remove</a></li>
+          
+          <li><a href="#method-i-_setMethods">#_setMethods</a></li>
+          
+          <li><a href="#method-i-method_missing">#method_missing</a></li>
+          
+          <li><a href="#method-i-to_s">#to_s</a></li>
+          
+          <li><a href="#method-i-to_str">#to_str</a></li>
+          
+        </ul>
+      </div>
+      
+
+      
+    </div>
+
+    <div id="project-metadata">
+      
+      
+      <div id="fileindex-section" class="section project-section">
+        <h3 class="section-header">Files</h3>
+        <ul>
+        
+          <li class="file"><a href="../Rakefile.html">Rakefile</a></li>
+        
+        </ul>
+      </div>
+      
+
+      <div id="classindex-section" class="section project-section">
+        <h3 class="section-header">Class/Module Index
+          <span class="search-toggle"><img src="../images/find.png"
+            height="16" width="16" alt="[+]"
+            title="show/hide quicksearch" /></span></h3>
+        <form action="#" method="get" accept-charset="utf-8" class="initially-hidden">
+        <fieldset>
+          <legend>Quicksearch</legend>
+          <input type="text" name="quicksearch" value=""
+            class="quicksearch-field" />
+        </fieldset>
+        </form>
+
+        <ul class="link-list">
+        
+          <li><a href="../SQLConstructor.html">SQLConstructor</a></li>
+        
+          <li><a href="../SQLConstructor/BasicDelete.html">SQLConstructor::BasicDelete</a></li>
+        
+          <li><a href="../SQLConstructor/BasicDelete_mysql.html">SQLConstructor::BasicDelete_mysql</a></li>
+        
+          <li><a href="../SQLConstructor/BasicInsert.html">SQLConstructor::BasicInsert</a></li>
+        
+          <li><a href="../SQLConstructor/BasicInsert_mysql.html">SQLConstructor::BasicInsert_mysql</a></li>
+        
+          <li><a href="../SQLConstructor/BasicJoin.html">SQLConstructor::BasicJoin</a></li>
+        
+          <li><a href="../SQLConstructor/BasicJoin_mysql.html">SQLConstructor::BasicJoin_mysql</a></li>
+        
+          <li><a href="../SQLConstructor/BasicSelect.html">SQLConstructor::BasicSelect</a></li>
+        
+          <li><a href="../SQLConstructor/BasicSelect_example.html">SQLConstructor::BasicSelect_example</a></li>
+        
+          <li><a href="../SQLConstructor/BasicSelect_mysql.html">SQLConstructor::BasicSelect_mysql</a></li>
+        
+          <li><a href="../SQLConstructor/BasicUnion.html">SQLConstructor::BasicUnion</a></li>
+        
+          <li><a href="../SQLConstructor/BasicUpdate.html">SQLConstructor::BasicUpdate</a></li>
+        
+          <li><a href="../SQLConstructor/BasicUpdate_mysql.html">SQLConstructor::BasicUpdate_mysql</a></li>
+        
+          <li><a href="../SQLConstructor/GenericQuery.html">SQLConstructor::GenericQuery</a></li>
+        
+          <li><a href="../SQLConstructor/QAttr.html">SQLConstructor::QAttr</a></li>
+        
+          <li><a href="../SQLExporter.html">SQLExporter</a></li>
+        
+          <li><a href="../SQLExporter/Exporter_generic.html">SQLExporter::Exporter_generic</a></li>
+        
+          <li><a href="../SQLExporter/Exporter_mysql.html">SQLExporter::Exporter_mysql</a></li>
+        
+          <li><a href="../SQLConditional.html">SQLConditional</a></li>
+        
+          <li><a href="../SQLConditional/BasicCond.html">SQLConditional::BasicCond</a></li>
+        
+          <li><a href="../Object.html">Object</a></li>
+        
+          <li><a href="../SQLAliasedList.html">SQLAliasedList</a></li>
+        
+          <li><a href="../SQLColumn.html">SQLColumn</a></li>
+        
+          <li><a href="../SQLCondList.html">SQLCondList</a></li>
+        
+          <li><a href="../SQLConstructorTest.html">SQLConstructorTest</a></li>
+        
+          <li><a href="../SQLObject.html">SQLObject</a></li>
+        
+          <li><a href="../SQLValList.html">SQLValList</a></li>
+        
+          <li><a href="../SQLValue.html">SQLValue</a></li>
+        
+        </ul>
+        <div id="no-class-search-results" style="display: none;">No matching classes.</div>
+      </div>
+
+      
+    </div>
+  </div>
+
+  <div id="documentation">
+    <h1 class="class">SQLConstructor::GenericQuery</h1>
+
+    <div id="description" class="description">
+      
+<p>Internal class - generic query attributes and methods. Should be parent to
+all Basic* classes.</p>
+
+    </div><!-- description -->
+
+    
+    
+    
+    <div id="5Buntitled-5D" class="documentation-section">
+      
+
+      
+
+      
+
+      
+      <!-- Attributes -->
+      <div id="attribute-method-details" class="method-section section">
+        <h3 class="section-header">Attributes</h3>
+
+        
+        <div id="attr_index_hints-attribute-method" class="method-detail">
+          <a name="attr_index_hints"></a>
+          
+          <div class="method-heading attribute-method-heading">
+            <span class="method-name">attr_index_hints</span><span
+              class="attribute-access-type">[R]</span>
+          </div>
+
+          <div class="method-description">
+          
+          
+          
+          </div>
+        </div>
+        
+        <div id="caller-attribute-method" class="method-detail">
+          <a name="caller"></a>
+          
+          <a name="caller="></a>
+          
+          <div class="method-heading attribute-method-heading">
+            <span class="method-name">caller</span><span
+              class="attribute-access-type">[RW]</span>
+          </div>
+
+          <div class="method-description">
+          
+          
+          
+          </div>
+        </div>
+        
+        <div id="child_caller-attribute-method" class="method-detail">
+          <a name="child_caller"></a>
+          
+          <div class="method-heading attribute-method-heading">
+            <span class="method-name">child_caller</span><span
+              class="attribute-access-type">[R]</span>
+          </div>
+
+          <div class="method-description">
+          
+          
+          
+          </div>
+        </div>
+        
+        <div id="dialect-attribute-method" class="method-detail">
+          <a name="dialect"></a>
+          
+          <div class="method-heading attribute-method-heading">
+            <span class="method-name">dialect</span><span
+              class="attribute-access-type">[R]</span>
+          </div>
+
+          <div class="method-description">
+          
+          
+          
+          </div>
+        </div>
+        
+        <div id="exporter-attribute-method" class="method-detail">
+          <a name="exporter"></a>
+          
+          <div class="method-heading attribute-method-heading">
+            <span class="method-name">exporter</span><span
+              class="attribute-access-type">[R]</span>
+          </div>
+
+          <div class="method-description">
+          
+          
+          
+          </div>
+        </div>
+        
+        <div id="string-attribute-method" class="method-detail">
+          <a name="string"></a>
+          
+          <a name="string="></a>
+          
+          <div class="method-heading attribute-method-heading">
+            <span class="method-name">string</span><span
+              class="attribute-access-type">[RW]</span>
+          </div>
+
+          <div class="method-description">
+          
+          
+          
+          </div>
+        </div>
+        
+        <div id="tidy-attribute-method" class="method-detail">
+          <a name="tidy"></a>
+          
+          <div class="method-heading attribute-method-heading">
+            <span class="method-name">tidy</span><span
+              class="attribute-access-type">[R]</span>
+          </div>
+
+          <div class="method-description">
+          
+          
+          
+          </div>
+        </div>
+        
+        <div id="type-attribute-method" class="method-detail">
+          <a name="type"></a>
+          
+          <div class="method-heading attribute-method-heading">
+            <span class="method-name">type</span><span
+              class="attribute-access-type">[R]</span>
+          </div>
+
+          <div class="method-description">
+          
+          
+          
+          </div>
+        </div>
+        
+      </div><!-- attribute-method-details -->
+      
+
+      <!-- Methods -->
+      
+      <div id="public-class-method-details" class="method-section section">
+        <h3 class="section-header">Public Class Methods</h3>
+
+      
+        <div id="new-method" class="method-detail ">
+          <a name="method-c-new"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">new</span><span
+              class="method-args">( _caller )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Class constructor.  _caller     - the caller object</p>
+            
+
+            
+            <div class="method-source-code" id="new-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconstructor.rb, line 242</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span> ( <span class="ruby-identifier">_caller</span> )
+    <span class="ruby-ivar">@caller</span>   = <span class="ruby-identifier">_caller</span>
+    <span class="ruby-ivar">@dialect</span>  = <span class="ruby-ivar">@caller</span>.<span class="ruby-identifier">dialect</span>
+    <span class="ruby-ivar">@tidy</span>     = <span class="ruby-ivar">@caller</span>.<span class="ruby-identifier">tidy</span>
+    <span class="ruby-ivar">@exporter</span> = <span class="ruby-identifier">_caller</span>.<span class="ruby-identifier">exporter</span>
+    <span class="ruby-ivar">@inline</span>   = <span class="ruby-ivar">@caller</span>.<span class="ruby-identifier">inline</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">_setMethods</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- new-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- new-method -->
+
+      
+      </div><!-- public-class-method-details -->
+    
+      <div id="public-instance-method-details" class="method-section section">
+        <h3 class="section-header">Public Instance Methods</h3>
+
+      
+        <div id="_get-method" class="method-detail ">
+          <a name="method-i-_get"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">_get</span><span
+              class="method-args">( clause, *args )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Returns an object by clause (keys of child class’ METHODS attribute) or by
+<a href="../SQLObject.html#attribute-i-name">SQLObject.name</a></p>
+            
+
+            
+            <div class="method-source-code" id="_get-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconstructor.rb, line 255</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">_get</span> ( <span class="ruby-identifier">clause</span>, *<span class="ruby-identifier">args</span> )
+    <span class="ruby-identifier">result</span> = <span class="ruby-keyword">nil</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-ivar">@methods</span>.<span class="ruby-identifier">has_key?</span> <span class="ruby-identifier">clause</span>
+        <span class="ruby-identifier">name</span> = <span class="ruby-identifier">args</span>  <span class="ruby-operator">?</span> <span class="ruby-identifier">args</span>[<span class="ruby-value">0</span>]  <span class="ruby-operator">:</span> <span class="ruby-keyword">nil</span>
+        <span class="ruby-identifier">result</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">send</span> <span class="ruby-ivar">@methods</span>[<span class="ruby-identifier">clause</span>].<span class="ruby-identifier">name</span>
+        <span class="ruby-identifier">result</span> = <span class="ruby-identifier">result</span>.<span class="ruby-identifier">val</span>  <span class="ruby-keyword">if</span> <span class="ruby-identifier">result</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">QAttr</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">name</span> <span class="ruby-operator">&amp;&amp;</span> [ <span class="ruby-constant">Array</span>, <span class="ruby-constant">SQLValList</span>, <span class="ruby-constant">SQLAliasedList</span>, <span class="ruby-constant">SQLCondList</span> ].<span class="ruby-identifier">include?</span>( <span class="ruby-identifier">result</span>.<span class="ruby-identifier">class</span> )
+             <span class="ruby-comment"># return the first object if multiple objects have the same name</span>
+            <span class="ruby-identifier">result</span> = <span class="ruby-identifier">result</span>.<span class="ruby-identifier">find</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">obj</span><span class="ruby-operator">|</span>  <span class="ruby-identifier">obj</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">name</span> }
+        <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>                         
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">result</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- _get-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- _get-method -->
+
+      
+        <div id="_remove-method" class="method-detail ">
+          <a name="method-i-_remove"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">_remove</span><span
+              class="method-args">( clause, *args )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>NILs attribute by clause name (specified in the child class’ METHODS 
+attribure), or removes an named item from a list attribute. This method
+must be overriden in child classes if any methods were  defined explicitly
+(not in METHODS).</p>
+            
+
+            
+            <div class="method-source-code" id="_remove-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconstructor.rb, line 275</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">_remove</span> ( <span class="ruby-identifier">clause</span>, *<span class="ruby-identifier">args</span> )
+    <span class="ruby-keyword">if</span> <span class="ruby-ivar">@methods</span>.<span class="ruby-identifier">has_key?</span> <span class="ruby-identifier">clause</span>
+        <span class="ruby-identifier">_attr</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">send</span> <span class="ruby-ivar">@methods</span>[<span class="ruby-identifier">clause</span>].<span class="ruby-identifier">name</span>
+        <span class="ruby-identifier">name</span> = <span class="ruby-identifier">args</span>  <span class="ruby-operator">?</span> <span class="ruby-identifier">args</span>[<span class="ruby-value">0</span>]  <span class="ruby-operator">:</span> <span class="ruby-keyword">nil</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">name</span> <span class="ruby-operator">&amp;&amp;</span> [ <span class="ruby-constant">Array</span>, <span class="ruby-constant">SQLValList</span>, <span class="ruby-constant">SQLAliasedList</span>, <span class="ruby-constant">SQLCondList</span> ].<span class="ruby-identifier">include?</span>( <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">class</span> )
+            <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">delete_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">obj</span><span class="ruby-operator">|</span>  <span class="ruby-identifier">obj</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">name</span> }
+        <span class="ruby-keyword">else</span>
+            <span class="ruby-keyword">self</span>.<span class="ruby-identifier">send</span> <span class="ruby-node">&quot;#{@methods[clause].name}=&quot;</span>, <span class="ruby-keyword">nil</span>
+        <span class="ruby-keyword">end</span>
+        <span class="ruby-ivar">@string</span> = <span class="ruby-keyword">nil</span>
+    <span class="ruby-keyword">end</span>                         
+    <span class="ruby-keyword">return</span> <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- _remove-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- _remove-method -->
+
+      
+        <div id="method_missing-method" class="method-detail ">
+          <a name="method-i-method_missing"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">method_missing</span><span
+              class="method-args">( method, *args )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Process method calls described in the child’s METHODS attribute. If no
+corresponding entries are found in all object’s parent classes, then send
+missing methods calls to the @caller object.</p>
+            
+
+            
+            <div class="method-source-code" id="method_missing-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconstructor.rb, line 303</span>
+        <span class="ruby-keyword">def</span> <span class="ruby-identifier">method_missing</span> ( <span class="ruby-identifier">method</span>, *<span class="ruby-identifier">args</span> )
+             <span class="ruby-comment"># If the method is described in the class' METHODS constant, then</span>
+             <span class="ruby-comment"># create an attribute with the proper name, an attr_accessor</span>
+             <span class="ruby-comment"># for it, and set it's value to the one in METHODS.</span>
+            <span class="ruby-keyword">if</span> <span class="ruby-ivar">@methods</span>.<span class="ruby-identifier">has_key?</span> <span class="ruby-identifier">method</span>
+                <span class="ruby-identifier">_attr</span> = <span class="ruby-ivar">@methods</span>[<span class="ruby-identifier">method</span>].<span class="ruby-identifier">dup</span>
+                <span class="ruby-identifier">attr_name</span> = <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">name</span>
+                <span class="ruby-identifier">val_obj</span> = <span class="ruby-keyword">nil</span>
+
+                 <span class="ruby-comment"># get the current value of the attribute {_attr.name}</span>
+                <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">send</span> <span class="ruby-value">:attr_accessor</span>, <span class="ruby-identifier">attr_name</span>.<span class="ruby-identifier">to_sym</span>
+                <span class="ruby-identifier">cur_attr</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">send</span> <span class="ruby-identifier">attr_name</span>.<span class="ruby-identifier">to_sym</span>
+                <span class="ruby-identifier">cur_attr_val</span> = <span class="ruby-identifier">cur_attr</span>.<span class="ruby-identifier">is_a?</span>( <span class="ruby-constant">QAttr</span> )  <span class="ruby-operator">?</span> <span class="ruby-identifier">cur_attr</span>.<span class="ruby-identifier">val</span>  <span class="ruby-operator">:</span> <span class="ruby-identifier">cur_attr</span>
+ 
+                 <span class="ruby-comment"># Create an instance of the corresponding class if _attr.val is </span>
+                 <span class="ruby-comment"># on of SQLObject container classes:</span>
+                <span class="ruby-keyword">if</span> [ <span class="ruby-constant">SQLValList</span>, <span class="ruby-constant">SQLAliasedList</span>, <span class="ruby-constant">SQLCondList</span> ].<span class="ruby-identifier">include?</span> <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val</span>
+                    <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val</span> = <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val</span>.<span class="ruby-identifier">new</span> *<span class="ruby-identifier">args</span>
+
+                 <span class="ruby-comment"># Create an array of SQLObjects if _attr.val is SQLObject class:</span>
+                <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val</span> <span class="ruby-operator">==</span> <span class="ruby-constant">SQLObject</span>
+                    <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val</span> = <span class="ruby-constant">SQLObject</span>.<span class="ruby-identifier">get</span> *<span class="ruby-identifier">args</span> <span class="ruby-comment">#args.map{ |arg|  SQLObject.get arg }</span>
+
+                 <span class="ruby-comment"># Create an instance of the corresponding class if _attr.val is </span>
+                 <span class="ruby-comment"># SQLConstructor or SQLConditional class:</span>
+                <span class="ruby-keyword">elsif</span> [ <span class="ruby-constant">SQLConstructor</span>, <span class="ruby-constant">SQLConditional</span> ].<span class="ruby-identifier">include?</span> <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val</span>
+                    <span class="ruby-identifier">val_obj</span> = <span class="ruby-identifier">cur_attr_val</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val</span>.<span class="ruby-identifier">new</span>(
+                                                    <span class="ruby-value">:dialect</span>  =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@dialect</span>,
+                                                    <span class="ruby-value">:tidy</span>     =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@tidy</span>,
+                                                    <span class="ruby-value">:exporter</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@exporter</span>,
+                                                    <span class="ruby-value">:caller</span>   =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">self</span>
+                                              )
+                    <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val</span> = <span class="ruby-identifier">val_obj</span>
+
+                 <span class="ruby-comment"># create a BasicSelect dialect-specific child class: </span>
+                <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val</span> <span class="ruby-operator">==</span> <span class="ruby-constant">BasicSelect</span>
+                    <span class="ruby-identifier">val_obj</span> = <span class="ruby-constant">SQLConstructor</span>.<span class="ruby-identifier">new</span>( 
+                                                    <span class="ruby-value">:dialect</span>  =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@dialect</span>, 
+                                                    <span class="ruby-value">:tidy</span>     =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@tidy</span>,
+                                                    <span class="ruby-value">:exporter</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@exporter</span> 
+                                                ).<span class="ruby-identifier">select</span>( *<span class="ruby-identifier">args</span> )
+                    <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val</span> = <span class="ruby-identifier">val_obj</span>
+
+                 <span class="ruby-comment"># If the :val parameter is some different class, then we should </span>
+                 <span class="ruby-comment"># create an instance of it or return the existing value:</span>
+                <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val</span>.<span class="ruby-identifier">ancestors</span>.<span class="ruby-identifier">include?</span>( <span class="ruby-constant">GenericQuery</span> )
+                    <span class="ruby-identifier">val_obj</span> = <span class="ruby-identifier">_getBasicClass</span>( <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val</span>, <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">text</span> )
+                    <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val</span> = <span class="ruby-identifier">val_obj</span>
+                <span class="ruby-keyword">end</span>
+
+                 <span class="ruby-comment"># If the object already has attribute {_attr.name} defined and it's</span>
+                 <span class="ruby-comment"># an array or one of the SQL* class containers,then we should rather </span>
+                 <span class="ruby-comment"># append to it than reassign the value.</span>
+                 <span class="ruby-comment"># If :attr_val=list, then create a new SQLAliasedList container.</span>
+                <span class="ruby-keyword">if</span> [ <span class="ruby-constant">Array</span>, <span class="ruby-constant">SQLValList</span>, <span class="ruby-constant">SQLAliasedList</span>, <span class="ruby-constant">SQLCondList</span> ].<span class="ruby-identifier">include?</span>( <span class="ruby-identifier">cur_attr_val</span>.<span class="ruby-identifier">class</span> ) <span class="ruby-operator">||</span>
+                   <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val_type</span> <span class="ruby-operator">==</span> <span class="ruby-string">'list'</span>
+                    <span class="ruby-identifier">cur_attr_val</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">SQLAliasedList</span>.<span class="ruby-identifier">new</span>
+                    <span class="ruby-identifier">cur_attr_val</span>.<span class="ruby-identifier">no_commas</span> = <span class="ruby-keyword">true</span>  <span class="ruby-keyword">if</span> <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">no_commas</span>
+                    <span class="ruby-identifier">cur_attr_val</span>.<span class="ruby-identifier">push</span> <span class="ruby-identifier">_attr</span>.<span class="ruby-identifier">val</span>
+                    <span class="ruby-identifier">_attr</span> = <span class="ruby-identifier">cur_attr_val</span>
+                <span class="ruby-keyword">end</span>
+
+<span class="ruby-comment">#                self.class.send :attr_accessor, attr_name.to_sym  if ! cur_attr_val</span>
+                <span class="ruby-keyword">self</span>.<span class="ruby-identifier">send</span> <span class="ruby-node">&quot;#{attr_name}=&quot;</span>, <span class="ruby-identifier">_attr</span>
+
+                <span class="ruby-ivar">@string</span> = <span class="ruby-keyword">nil</span>
+                <span class="ruby-keyword">return</span> ( <span class="ruby-identifier">val_obj</span> <span class="ruby-operator">||</span> <span class="ruby-keyword">self</span> )
+            <span class="ruby-keyword">end</span>
+
+             <span class="ruby-comment"># Otherwise send the call to @caller object</span>
+            <span class="ruby-ivar">@child_caller</span> = <span class="ruby-keyword">self</span>
+            <span class="ruby-keyword">return</span> <span class="ruby-ivar">@caller</span>.<span class="ruby-identifier">send</span>( <span class="ruby-identifier">method</span>.<span class="ruby-identifier">to_sym</span>, *<span class="ruby-identifier">args</span> )  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@caller</span>
+            <span class="ruby-identifier">raise</span> <span class="ruby-constant">NoMethodError</span>, <span class="ruby-constant">ERR_UNKNOWN_METHOD</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;: &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">method</span>.<span class="ruby-identifier">to_s</span>
+        <span class="ruby-keyword">end</span></pre>
+            </div><!-- method_missing-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- method_missing-method -->
+
+      
+        <div id="to_s-method" class="method-detail ">
+          <a name="method-i-to_s"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">to_s</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Convert object to string by calling the .export() method of the @exporter
+object.</p>
+            
+
+            
+            <div class="method-source-code" id="to_s-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconstructor.rb, line 293</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">to_s</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-ivar">@string</span>  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@string</span>
+    <span class="ruby-ivar">@string</span> = <span class="ruby-ivar">@exporter</span>.<span class="ruby-identifier">export</span> <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- to_s-source -->
+            
+          </div>
+
+          
+          <div class="aliases">
+            Also aliased as: <a href="GenericQuery.html#method-i-to_str">to_str</a>
+          </div>
+          
+
+          
+        </div><!-- to_s-method -->
+
+      
+        <div id="to_str-method" class="method-detail method-alias">
+          <a name="method-i-to_str"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">to_str</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Dirty hack to make .join work on an array of GenericQueries</p>
+            
+
+            
+          </div>
+
+          
+
+          
+          <div class="aliases">
+            Alias for: <a href="GenericQuery.html#method-i-to_s">to_s</a>
+          </div>
+          
+        </div><!-- to_str-method -->
+
+      
+      </div><!-- public-instance-method-details -->
+    
+      <div id="protected-instance-method-details" class="method-section section">
+        <h3 class="section-header">Protected Instance Methods</h3>
+
+      
+        <div id="_addJoin-method" class="method-detail ">
+          <a name="method-i-_addJoin"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">_addJoin</span><span
+              class="method-args">( type, *tables )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Creates a new <a href="BasicJoin.html">BasicJoin</a> object for the JOIN
+statement.</p>
+            
+
+            
+            <div class="method-source-code" id="_addJoin-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconstructor.rb, line 385</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">_addJoin</span> ( <span class="ruby-identifier">type</span>, *<span class="ruby-identifier">tables</span> )
+    <span class="ruby-ivar">@string</span> = <span class="ruby-keyword">nil</span>
+    <span class="ruby-identifier">join</span> = <span class="ruby-identifier">_getBasicClass</span> <span class="ruby-constant">BasicJoin</span>, <span class="ruby-identifier">type</span>, *<span class="ruby-identifier">tables</span>
+    <span class="ruby-ivar">@attr_joins</span> <span class="ruby-operator">||=</span> [ ]
+    <span class="ruby-ivar">@attr_joins</span>.<span class="ruby-identifier">push</span> <span class="ruby-identifier">join</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">join</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- _addJoin-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- _addJoin-method -->
+
+      
+        <div id="_getBasicClass-method" class="method-detail ">
+          <a name="method-i-_getBasicClass"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">_getBasicClass</span><span
+              class="method-args">( class_basic, *args )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Returns an instance of Basic* child dialect-specific class</p>
+            
+
+            
+            <div class="method-source-code" id="_getBasicClass-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconstructor.rb, line 396</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">_getBasicClass</span> ( <span class="ruby-identifier">class_basic</span>, *<span class="ruby-identifier">args</span> )
+    <span class="ruby-identifier">class_basic_name</span> = <span class="ruby-identifier">class_basic</span>.<span class="ruby-identifier">name</span>.<span class="ruby-identifier">sub</span> <span class="ruby-regexp">/^(?:\w+::)*/</span>, <span class="ruby-string">''</span> 
+    <span class="ruby-identifier">class_child</span> = <span class="ruby-identifier">class_basic_name</span> <span class="ruby-operator">+</span> <span class="ruby-string">'_'</span> <span class="ruby-operator">+</span> <span class="ruby-ivar">@dialect</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-constant">SQLConstructor</span>.<span class="ruby-identifier">const_defined?</span> <span class="ruby-identifier">class_child</span>.<span class="ruby-identifier">to_sym</span>
+        <span class="ruby-constant">SQLConstructor</span>.<span class="ruby-identifier">const_get</span>( <span class="ruby-identifier">class_child</span>.<span class="ruby-identifier">to_sym</span> ).<span class="ruby-identifier">new</span> <span class="ruby-keyword">self</span>, *<span class="ruby-identifier">args</span>
+    <span class="ruby-keyword">else</span>
+        <span class="ruby-constant">SQLConstructor</span>.<span class="ruby-identifier">const_get</span>( <span class="ruby-identifier">class_basic_name</span>.<span class="ruby-identifier">to_sym</span> ).<span class="ruby-identifier">new</span> <span class="ruby-keyword">self</span>, *<span class="ruby-identifier">args</span>
+    <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- _getBasicClass-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- _getBasicClass-method -->
+
+      
+        <div id="_setMethods-method" class="method-detail ">
+          <a name="method-i-_setMethods"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">_setMethods</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Returns the METHODS hash of child dialect-specific class merged with
+parent’s METHODS hash.</p>
+            
+
+            
+            <div class="method-source-code" id="_setMethods-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconstructor.rb, line 410</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">_setMethods</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span> <span class="ruby-ivar">@methods</span>
+        <span class="ruby-identifier">methods_self</span> = { }
+        <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">ancestors</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">_class</span><span class="ruby-operator">|</span> 
+            <span class="ruby-keyword">next</span>  <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span> <span class="ruby-identifier">_class</span>.<span class="ruby-identifier">ancestors</span>.<span class="ruby-identifier">include?</span> <span class="ruby-constant">SQLConstructor</span><span class="ruby-operator">::</span><span class="ruby-constant">GenericQuery</span>
+            <span class="ruby-keyword">begin</span>
+                <span class="ruby-identifier">class_methods</span> = <span class="ruby-identifier">_class</span>.<span class="ruby-identifier">const_get</span> <span class="ruby-value">:METHODS</span> <span class="ruby-operator">||</span> { }
+            <span class="ruby-keyword">rescue</span>
+                <span class="ruby-identifier">class_methods</span> = { }
+            <span class="ruby-keyword">end</span>
+            <span class="ruby-identifier">methods_self</span>.<span class="ruby-identifier">merge!</span> <span class="ruby-identifier">class_methods</span>
+        <span class="ruby-keyword">end</span>
+        <span class="ruby-ivar">@methods</span> = <span class="ruby-identifier">methods_self</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-ivar">@methods</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- _setMethods-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- _setMethods-method -->
+
+      
+      </div><!-- protected-instance-method-details -->
+    
+    </div><!-- 5Buntitled-5D -->
+  
+
+  </div><!-- documentation -->
+
+  <div id="validator-badges">
+    <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+    <p><small>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish
+      Rdoc Generator</a> 2</small>.</p>
+  </div>
+
+</body>
+</html>
+

@@ -7,12 +7,91 @@ require File.expand_path( "../sqlexporter", __FILE__ )
 require File.expand_path( "../sqlerrors", __FILE__ )
 
 ##################################################################################################
-#   This class implements methods to construct a valid SQL query.
-#
 #   Author::    Vasiliy Korol  (mailto:vakorol@mail.ru)
 #   Copyright:: Vasiliy Korol (c) 2014
 #   License::   Distributes under terms of GPLv2
-##################################################################################################
+#
+#   This class implements methods to construct a valid SQL query.
+#   SQL SELECT, DELETE, UPDATE and INSERT clauses are supported. 
+#
+#   There's also an experimental implementation of MySQL index hints.
+#
+#   Column values and other data that should be escaped is passed to the methods as strings. 
+#   Column and table names, aliases and everything that goes unescaped is passed as symbols.
+#   === Typical usage:
+#       sql = SQLConstructor.new
+#       sql.select( :col1, :col2 ).from( :table ).where.eq( :col3, 16 ).and.lt( :col4, 5 )
+#       p sql
+#
+#   will result in:
+#
+#       SELECT  col1,col2 FROM table WHERE  (col3 = 16  AND col4 < 5)
+#
+#   One can also construct complex queries like:
+#
+#       sql = SQLConstructor.new( :tidy => true, :dialect => 'mysql' )
+#       inner_select1 = SQLConstructor.new( :tidy => true )
+#       inner_select1.select( :"MAX(h.item_id)" ).from( :item_data => :d ).
+#         inner_join( :call_data => :h ).on.eq( :"d.item_nm", :call_ref ).where.
+#             eq( :"d.item_num", :"g.item_num" ).group_by( :"h.venue_nm" ).having.eq( :"COUNT(*)", 1 )
+#       inner_select2 = SQLConstructor.new( :dialect => 'mysql', :tidy => true )
+#       inner_select2.select( :"d.item_num" ).from( :item_data => :d ).
+#             inner_join( :call_data => :h ).on.eq( :"d.item_nm", :call_ref ).
+#             group_by( :"h.venue_nm" ).having.eq( :"COUNT(*)", 1 )
+#       sql.update( :guest => :g ).set( :link_id => inner_select1).
+#           where.in( :"g.item_num", inner_select2 )
+#       p sql
+#
+#   It will produce:
+#
+#       UPDATE
+#        guest g
+#       SET link_id=
+#       (SELECT
+#        MAX(h.item_id)
+#       FROM item_data d
+#       INNER JOIN call_data h
+#       ON 
+#       (d.item_nm = call_ref)
+#       WHERE 
+#       (d.item_num = g.item_num)
+#       GROUP BY h.venue_nm
+#       HAVING 
+#       (COUNT(*) = 1)
+#       )
+#       WHERE 
+#       (g.item_num IN 
+#       (SELECT
+#        d.item_num
+#       FROM item_data d
+#       INNER JOIN call_data h
+#       ON 
+#       (d.item_nm = call_ref)
+#       GROUP BY h.venue_nm
+#       HAVING 
+#       (COUNT(*) = 1)
+#       ))
+#
+#   Queries can be modified "on the fly", which can be useful for dynamic construction:
+#
+#       sql.delete.from( :datas ).where.ne( :x, "SOME TEXT" ).order_by( :y )
+#       p sql
+#
+#       DELETE
+#       FROM datas
+#       WHERE 
+#       (x != 'SOME TEXT')
+#       ORDER BY y
+#
+#       sql._remove( :order_by )
+#       sql._get( :from ).push( :dataf )
+#       p sql
+#
+#       DELETE
+#       FROM datas,dataf
+#       WHERE 
+#       (x != 'SOME TEXT')
+#################################################################################################
 class SQLConstructor < SQLObject
 
     attr_accessor :exporter, :tidy
@@ -38,14 +117,16 @@ class SQLConstructor < SQLObject
     end
     
     ##########################################################################
-    #   Add a SELECT statement with columns specified by *cols 
+    #   Add a SELECT statement with columns specified by *cols.
+    #   Returns an instance of BasicSelect_[%dialect%] class.
     ##########################################################################
     def select ( *cols )
         _getGenericQuery 'select', *cols
     end
 
     ##########################################################################
-    #   Add a DELETE statement
+    #   Add a DELETE statement.
+    #   Returns an instance of BasicDelete_[%dialect%] class.
     ##########################################################################
     def delete
         _getGenericQuery 'delete'
@@ -53,6 +134,7 @@ class SQLConstructor < SQLObject
 
     ##########################################################################
     #   Add a INSERT statement
+    #   Returns an instance of BasicInsert_[%dialect%] class.
     ##########################################################################
     def insert
         _getGenericQuery 'insert'
@@ -60,21 +142,12 @@ class SQLConstructor < SQLObject
 
     ##########################################################################
     #   Add a UPDATE statement
+    #   Returns an instance of BasicUpdate_[%dialect%] class.
     ##########################################################################
     def update ( *tabs )
         _getGenericQuery 'update', *tabs
     end
    
-    ##########################################################################
-    #   Pass all unknown methods to @obj
-    ##########################################################################
-    def method_missing ( method, *args )
-        return @obj.send( method, *args )  if @obj && @obj.child_caller != @obj  
-         # raise an exception if the call is "bouncing" between self and @obj
-        raise NoMethodError, ERR_UNKNOWN_METHOD + 
-            ": '#{method.to_s}' from #{@obj.class.name}"
-    end
-    
     ##########################################################################
     #   Convert object to string by calling the .export() method of
     #   the @exporter object.
@@ -85,6 +158,17 @@ class SQLConstructor < SQLObject
         @string = @exporter.export @obj
     end
 
+    ##########################################################################
+    #   Pass all unknown methods to @obj or throw an exception if the call
+    #   already originated from @obj.
+    ##########################################################################
+    def method_missing ( method, *args )
+        return @obj.send( method, *args )  if @obj && @obj.child_caller != @obj  
+         # raise an exception if the call is "bouncing" between self and @obj
+        raise NoMethodError, ERR_UNKNOWN_METHOD + 
+            ": '#{method.to_s}' from #{@obj.class.name}"
+    end
+ 
 
   #########
   private
@@ -141,12 +225,12 @@ class SQLConstructor < SQLObject
 
   ###############################################################################################
   #   Internal class - generic query attributes and methods. Should be parent to all Basic*
-  #   classes
+  #   classes.
   ###############################################################################################
     class GenericQuery < SQLObject
 
         attr_accessor :caller, :string
-        attr_reader :type, :dialect, :exporter, :child_caller, :tidy, :gen_index_hints
+        attr_reader :type, :dialect, :exporter, :child_caller, :tidy, :attr_index_hints
 
          # Dirty hack to make .join work on an array of GenericQueries
         alias :to_str :to_s
@@ -165,7 +249,8 @@ class SQLConstructor < SQLObject
         end
 
         ##########################################################################
-        #   Returns an object by clause (keys of METHODS hash) or by SQLObject.name
+        #   Returns an object by clause (keys of child class' METHODS attribute)
+        #   or by SQLObject.name
         ##########################################################################
         def _get ( clause, *args )
             result = nil
@@ -182,8 +267,8 @@ class SQLConstructor < SQLObject
         end
  
         ##########################################################################
-        #   NILs attribute by clause name (specified in the METHODS constant), or
-        #   removes an named item from a list attribute.
+        #   NILs attribute by clause name (specified in the child class' METHODS 
+        #   attribure), or removes an named item from a list attribute.
         #   This method must be overriden in child classes if any methods were 
         #   defined explicitly (not in METHODS).
         ##########################################################################
@@ -211,9 +296,8 @@ class SQLConstructor < SQLObject
         end
  
         ##########################################################################
-        #   Process method calls for clauses described in METHODS constant array
-        #   of the calling object's class.
-        #   If no corresponding entries are found in all object's parent classes, 
+        #   Process method calls described in the child's METHODS attribute.
+        #   If no corresponding entries are found in all object's parent classes,
         #   then send missing methods calls to the @caller object.
         ##########################################################################
         def method_missing ( method, *args )
@@ -301,8 +385,8 @@ class SQLConstructor < SQLObject
         def _addJoin ( type, *tables )
             @string = nil
             join = _getBasicClass BasicJoin, type, *tables
-            @gen_joins ||= [ ]
-            @gen_joins.push join
+            @attr_joins ||= [ ]
+            @attr_joins.push join
             return join
         end
 
@@ -446,53 +530,53 @@ class SQLConstructor < SQLObject
   ###############################################################################################
     class BasicSelect < GenericQuery
 
-        attr_accessor :sel_expression, :sel_group_by, :sel_unions, :gen_index_hints, 
-                      :sel_distinction, :sel_having, :sel_group_by_order, :gen_where, :gen_from,
-                      :gen_first, :gen_skip, :gen_order_by, :gen_order_by_order, :gen_joins
+        attr_accessor :attr_expression, :attr_group_by, :attr_unions, :attr_index_hints, 
+                      :attr_distinction, :attr_having, :attr_group_by_order, :attr_where, :attr_from,
+                      :attr_first, :attr_skip, :attr_order_by, :attr_order_by_order, :attr_joins
 
+         # Hash - list of available class meta-methods, which would be processed by .method_missing()
+         # to set the appropriate object's attributes (as defined in the METHODS hash itself).
+         # The keys of the hash are the methods names (symbols), the values are instances of
+         # the QAttr class.
         METHODS = {
-            :where    => QAttr.new( :name => 'gen_where', :text => 'WHERE', 
-                                        :val => SQLConditional ),
-            :from     => QAttr.new( :name => 'gen_from',  :text => 'FROM',  :val => SQLAliasedList ),
-            :all         => QAttr.new( :name => 'sel_distinction', :text => 'ALL'         ),
-            :distinct    => QAttr.new( :name => 'sel_distinction', :text => 'DISTINCT'    ),
-            :distinctrow => QAttr.new( :name => 'sel_distinction', :text => 'DISTINCTROW' ),
-            :having      => QAttr.new( :name => 'sel_having', :text => 'HAVING', 
-                                       :val  => SQLConditional ),
-            :group_by    => QAttr.new( :name => 'sel_group_by', :text => 'GROUP BY',  
-                                       :val => SQLObject ),
-            :group_by_asc   => QAttr.new( :name => 'sel_group_by_order', :text => 'ASC'  ),
-            :group_by_desc  => QAttr.new( :name => 'sel_group_by_order', :text => 'DESC' ),
+            :where => QAttr.new( :name => 'attr_where', :text => 'WHERE', :val => SQLConditional ),
+            :from  => QAttr.new( :name => 'attr_from',  :text => 'FROM',  :val => SQLAliasedList ),
+            :all         => QAttr.new( :name => 'attr_distinction', :text => 'ALL'         ),
+            :distinct    => QAttr.new( :name => 'attr_distinction', :text => 'DISTINCT'    ),
+            :distinctrow => QAttr.new( :name => 'attr_distinction', :text => 'DISTINCTROW' ),
+            :having => QAttr.new( :name => 'attr_having', :text => 'HAVING', :val => SQLConditional ),
+            :group_by => QAttr.new( :name => 'attr_group_by', :text => 'GROUP BY', :val => SQLObject),
+            :group_by_asc   => QAttr.new( :name => 'attr_group_by_order', :text => 'ASC'  ),
+            :group_by_desc  => QAttr.new( :name => 'attr_group_by_order', :text => 'DESC' ),
             :union          => QAttr.new( 
-                                :name     => 'sel_unions',   
+                                :name     => 'attr_unions',   
                                 :text     => 'UNION',
                                 :val_type => 'list',
                                 :no_commas => true,
                                 :val      => SQLConstructor::BasicUnion
                                ),
             :union_all      => QAttr.new(
-                                :name     => 'sel_unions',
+                                :name     => 'attr_unions',
                                 :text     => 'UNION_ALL',
                                 :val_type => 'list',
                                 :no_commas => true,
                                 :val      => SQLConstructor::BasicUnion
                                ),
             :union_distinct => QAttr.new(
-                                :name     => 'sel_unions',   
+                                :name     => 'attr_unions',   
                                 :text     => 'UNION_DISTINCT', 
                                 :val_type => 'list',
                                 :no_commas => true,
                                 :val      => SQLConstructor::BasicUnion
                                ),
-            :join => SQLConstructor::QAttr.new( :name => "gen_joins", :text => "JOIN", 
+            :join => SQLConstructor::QAttr.new( :name => "attr_joins", :text => "JOIN", 
                                                 :val => SQLConstructor::BasicJoin, 
                                                 :val_type => 'list' ),
-            :first    => QAttr.new( :name => 'gen_first', :text => 'FIRST', :val => SQLObject ),
-            :skip     => QAttr.new( :name => 'gen_skip',  :text => 'SKIP',  :val => SQLObject ),
-            :order_by => QAttr.new( :name => 'gen_order_by', :text => 'ORDER BY', 
-                                    :val => SQLObject ),
-            :order_by_asc  => QAttr.new( :name => 'gen_order_by_order', :text => 'ASC' ),
-            :order_by_desc => QAttr.new( :name => 'gen_order_by_order', :text => 'DESC' )
+            :first    => QAttr.new( :name => 'attr_first', :text => 'FIRST', :val => SQLObject ),
+            :skip     => QAttr.new( :name => 'attr_skip',  :text => 'SKIP',  :val => SQLObject ),
+            :order_by => QAttr.new( :name => 'attr_order_by', :text => 'ORDER BY', :val => SQLObject ),
+            :order_by_asc  => QAttr.new( :name => 'attr_order_by_order', :text => 'ASC' ),
+            :order_by_desc => QAttr.new( :name => 'attr_order_by_order', :text => 'DESC' )
         }
  
         ##########################################################################
@@ -502,18 +586,18 @@ class SQLConstructor < SQLObject
         ##########################################################################
         def initialize ( _caller, *list )
             super _caller
-            @sel_expression = QAttr.new(
-                                :name => 'sel_expression',
+            @attr_expression = QAttr.new(
+                                :name => 'attr_expression',
                                 :text => '',
                                 :val  => SQLAliasedList.new( *list )
                               )
         end
 
         ##########################################################################
-        #   Add more objects to SELECT expression list ( @sel_expression[:val] )
+        #   Add more objects to SELECT expression list ( @attr_expression[:val] )
         ##########################################################################
         def select_more ( *list )
-            @sel_expression.val.push *list
+            @attr_expression.val.push *list
         end
 
     end
@@ -524,21 +608,19 @@ class SQLConstructor < SQLObject
   ###############################################################################################
     class BasicDelete < GenericQuery
 
-        attr_accessor :del_using, :gen_where, :gen_from, :gen_skip, :gen_first, :gen_order_by,
-                      :gen_order_by_order
+        attr_accessor :del_using, :attr_where, :attr_from, :attr_skip, :attr_first, :attr_order_by,
+                      :attr_order_by_order
 
         METHODS = { 
-                    :using => QAttr.new( :name => 'del_using', :text => 'USING', 
-                                         :val => SQLObject ),
-                    :where => QAttr.new( :name => 'gen_where', :text => 'WHERE', 
-                                         :val => SQLConditional ),
-                    :from  => QAttr.new( :name => 'gen_from',  :text => 'FROM',  :val => SQLAliasedList ),
-                    :first => QAttr.new( :name => 'gen_first', :text => 'FIRST', :val => SQLObject ),
-                    :skip  => QAttr.new( :name => 'gen_skip',  :text => 'SKIP',  :val => SQLObject ),
-                    :order_by => QAttr.new( :name => 'gen_order_by', :text => 'ORDER BY', 
-                                            :val => SQLObject ),
-                    :order_by_asc  => QAttr.new( :name => 'gen_order_by_order', :text => 'ASC' ),
-                    :order_by_desc => QAttr.new( :name => 'gen_order_by_order', :text => 'DESC' )
+                :using => QAttr.new( :name => 'del_using', :text => 'USING', :val => SQLObject ),
+                :where => QAttr.new( :name => 'attr_where', :text => 'WHERE', :val => SQLConditional),
+                :from  => QAttr.new( :name => 'attr_from',  :text => 'FROM',  :val => SQLAliasedList),
+                :first => QAttr.new( :name => 'attr_first', :text => 'FIRST', :val => SQLObject ),
+                :skip  => QAttr.new( :name => 'attr_skip',  :text => 'SKIP',  :val => SQLObject ),
+                :order_by => QAttr.new( :name => 'attr_order_by', :text => 'ORDER BY', 
+                                        :val => SQLObject ),
+                :order_by_asc  => QAttr.new( :name => 'attr_order_by_order', :text => 'ASC' ),
+                :order_by_desc => QAttr.new( :name => 'attr_order_by_order', :text => 'DESC' )
                   }
 
         ##########################################################################
@@ -560,12 +642,11 @@ class SQLConstructor < SQLObject
         attr_reader :ins_into, :ins_values, :ins_set, :ins_columns, :ins_select
 
         METHODS = {
-                  :into => QAttr.new( :name => 'ins_into', :text => 'INTO', :val => SQLObject ),
-                  :values => QAttr.new( :name => 'ins_values', :text => 'VALUES', :val => SQLValList),
-                  :set => QAttr.new( :name => 'ins_set', :text => 'SET', :val => SQLCondList ),
-                  :columns => QAttr.new( :name => 'ins_columns', :text => 'COLUMNS', 
-                                         :val => SQLObject ),
-                  :select => QAttr.new( :name => 'ins_select', :text => '', :val => BasicSelect )
+                :into => QAttr.new( :name => 'ins_into', :text => 'INTO', :val => SQLObject ),
+                :values => QAttr.new( :name => 'ins_values', :text => 'VALUES', :val => SQLValList),
+                :set => QAttr.new( :name => 'ins_set', :text => 'SET', :val => SQLCondList ),
+                :columns => QAttr.new( :name => 'ins_columns', :text => 'COLUMNS', :val => SQLObject),
+                :select => QAttr.new( :name => 'ins_select', :text => '', :val => BasicSelect )
                   }
  
         ##########################################################################
@@ -584,15 +665,14 @@ class SQLConstructor < SQLObject
   ###############################################################################################
     class BasicUpdate < GenericQuery
 
-        attr_accessor :upd_tables, :upd_set, :gen_where, :gen_order_by, :gen_first, :gen_skip
+        attr_accessor :upd_tables, :upd_set, :attr_where, :attr_order_by, :attr_first, :attr_skip
 
         METHODS = {
-                    :tables => QAttr.new( :name => 'upd_tables', :text => '', :val => SQLObject ),
-                    :set    => QAttr.new( :name => 'upd_set', :text => 'SET', :val => SQLCondList ),
-                    :where  => QAttr.new( :name => 'gen_where', :text => 'WHERE', 
-                                          :val => SQLConditional ),
-                    :first  => QAttr.new( :name => 'gen_first', :text => 'FIRST', :val => SQLObject ),
-                    :skip   => QAttr.new( :name => 'gen_skip',  :text => 'SKIP',  :val => SQLObject ),
+                :tables => QAttr.new( :name => 'upd_tables', :text => '', :val => SQLObject ),
+                :set    => QAttr.new( :name => 'upd_set', :text => 'SET', :val => SQLCondList ),
+                :where => QAttr.new( :name => 'attr_where', :text => 'WHERE', :val => SQLConditional),
+                :first  => QAttr.new( :name => 'attr_first', :text => 'FIRST', :val => SQLObject ),
+                :skip   => QAttr.new( :name => 'attr_skip',  :text => 'SKIP',  :val => SQLObject ),
                   }
  
         ##########################################################################

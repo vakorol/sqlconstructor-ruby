@@ -9,24 +9,24 @@
          # The main rule for the MySQL SELECT query syntax
         SELECT_SYNTAX = [
                             "SELECT",
-                            :sel_distinction,
-                            :sel_high_priority,
-                            :sel_straight_join,
-                            :sel_sql_result_size,
-                            :sel_sql_cache,
-                            :sel_sql_calc_found_rows,
-                            :sel_expression,
-                            :gen_from,    
-                            :gen_joins,   
-                            :gen_where,   
-                            :sel_group_by,
-                            :sel_group_by_order,
-                            :sel_group_by_with_rollup,
-                            :sel_having,  
-                            :gen_order_by,
-                            :gen_order_by_order,
-                            :gen_limit,
-                            :sel_unions
+                            :attr_distinction,
+                            :attr_high_priority,
+                            :attr_straight_join,
+                            :attr_sql_result_size,
+                            :attr_sql_cache,
+                            :attr_sql_calc_found_rows,
+                            :attr_expression,
+                            :attr_from,    
+                            :attr_joins,   
+                            :attr_where,   
+                            :attr_group_by,
+                            :attr_group_by_order,
+                            :attr_group_by_with_rollup,
+                            :attr_having,  
+                            :attr_order_by,
+                            :attr_order_by_order,
+                            :attr_limit,
+                            :attr_unions
                         ]
 
          # The main rule for the MySQL DELETE query syntax
@@ -35,10 +35,10 @@
                             :del_low_priority,
                             :del_quick,
                             :del_ignore,
-                            :gen_from,
-                            :gen_where,
-                            :gen_order_by,
-                            :gen_limit
+                            :attr_from,
+                            :attr_where,
+                            :attr_order_by,
+                            :attr_limit
                         ]
  
         INSERT_SYNTAX = [
@@ -58,9 +58,9 @@
                             :upd_ignore,
                             :upd_tables,
                             :upd_set,
-                            :gen_where,
-                            :gen_order_by,
-                            :gen_limit
+                            :attr_where,
+                            :attr_order_by,
+                            :attr_limit
                         ]
  
 
@@ -74,10 +74,10 @@
         #   Forms a string for the FROM clause from the objects attributes @attr_from
         #   and @attr_index_hints
         #############################################################################
-        def gen_from ( obj )
+        def attr_from ( obj )
             result = ""
-            if obj.gen_from
-                result = "FROM " + to_sWithAliasesIndexes( obj, obj.gen_from.val )
+            if obj.attr_from
+                result = "FROM " + to_sWithAliasesIndexes( obj, obj.attr_from.val )
             end
             return result
         end
@@ -95,8 +95,8 @@
             list.each_with_index do |item,i|
                 _alias = item.alias ? " " + item.alias.to_s : ""
                 str = item.to_s + _alias
-                if obj.gen_index_hints
-                    index_hash = obj.gen_index_hints[i]
+                if obj.attr_index_hints
+                    index_hash = obj.attr_index_hints[i]
                     str += " " + index_hash[:type] + " " + index_hash[:list].to_s
                 end
                 arr << str

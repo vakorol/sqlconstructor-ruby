@@ -7,6 +7,7 @@ class SQLExporter
     attr_accessor :dialect, :tidy
     attr_reader :separator
 
+     # defaults to 'mysql'
     DEFAULT_DIALECT = 'mysql'
 
     #############################################################################

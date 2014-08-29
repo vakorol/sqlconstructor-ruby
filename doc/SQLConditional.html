@@ -1,0 +1,1082 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+
+  <title>Class: SQLConditional</title>
+
+  <link rel="stylesheet" href="./rdoc.css" type="text/css" media="screen" />
+
+  <script src="./js/jquery.js" type="text/javascript" charset="utf-8"></script>
+  <script src="./js/thickbox-compressed.js" type="text/javascript" charset="utf-8"></script>
+  <script src="./js/quicksearch.js" type="text/javascript" charset="utf-8"></script>
+  <script src="./js/darkfish.js" type="text/javascript" charset="utf-8"></script>
+
+</head>
+<body id="top" class="class">
+
+  <div id="metadata">
+    <div id="home-metadata">
+      <div id="home-section" class="section">
+        <h3 class="section-header">
+          <a href="./index.html">Home</a>
+          <a href="./index.html#classes">Classes</a>
+          <a href="./index.html#methods">Methods</a>
+        </h3>
+      </div>
+    </div>
+
+    <div id="file-metadata">
+      <div id="file-list-section" class="section">
+        <h3 class="section-header">In Files</h3>
+        <div class="section-body">
+          <ul>
+          
+            <li><a href="./lib/sqlconditional_rb.html?TB_iframe=true&amp;height=550&amp;width=785"
+              class="thickbox" title="lib/sqlconditional.rb">lib/sqlconditional.rb</a></li>
+          
+          </ul>
+        </div>
+      </div>
+
+      
+    </div>
+
+    <div id="class-metadata">
+      
+      <!-- Parent Class -->
+      <div id="parent-class-section" class="section">
+        <h3 class="section-header">Parent</h3>
+        
+        <p class="link"><a href="SQLObject.html">SQLObject</a></p>
+        
+      </div>
+      
+
+      
+
+      
+      <!-- Namespace Contents -->
+      <div id="namespace-list-section" class="section">
+        <h3 class="section-header">Namespace</h3>
+        <ul class="link-list">
+          
+          <li><span class="type">CLASS</span> <a href="SQLConditional/BasicCond.html">SQLConditional::BasicCond</a></li>
+          
+        </ul>
+      </div>
+      
+
+      
+      <!-- Method Quickref -->
+      <div id="method-list-section" class="section">
+        <h3 class="section-header">Methods</h3>
+        <ul class="link-list">
+          
+          <li><a href="#method-c-new">::new</a></li>
+          
+          <li><a href="#method-i-_addBasicCond">#_addBasicCond</a></li>
+          
+          <li><a href="#method-i-and">#and</a></li>
+          
+          <li><a href="#method-i-eq">#eq</a></li>
+          
+          <li><a href="#method-i-gt">#gt</a></li>
+          
+          <li><a href="#method-i-gte">#gte</a></li>
+          
+          <li><a href="#method-i-in">#in</a></li>
+          
+          <li><a href="#method-i-is">#is</a></li>
+          
+          <li><a href="#method-i-is_not_null">#is_not_null</a></li>
+          
+          <li><a href="#method-i-is_null">#is_null</a></li>
+          
+          <li><a href="#method-i-like">#like</a></li>
+          
+          <li><a href="#method-i-lt">#lt</a></li>
+          
+          <li><a href="#method-i-lte">#lte</a></li>
+          
+          <li><a href="#method-i-method_missing">#method_missing</a></li>
+          
+          <li><a href="#method-i-ne">#ne</a></li>
+          
+          <li><a href="#method-i-not">#not</a></li>
+          
+          <li><a href="#method-i-not_in">#not_in</a></li>
+          
+          <li><a href="#method-i-not_is">#not_is</a></li>
+          
+          <li><a href="#method-i-not_like">#not_like</a></li>
+          
+          <li><a href="#method-i-or">#or</a></li>
+          
+          <li><a href="#method-i-to_s">#to_s</a></li>
+          
+          <li><a href="#method-i-to_str">#to_str</a></li>
+          
+        </ul>
+      </div>
+      
+
+      
+    </div>
+
+    <div id="project-metadata">
+      
+      
+      <div id="fileindex-section" class="section project-section">
+        <h3 class="section-header">Files</h3>
+        <ul>
+        
+          <li class="file"><a href="./Rakefile.html">Rakefile</a></li>
+        
+        </ul>
+      </div>
+      
+
+      <div id="classindex-section" class="section project-section">
+        <h3 class="section-header">Class/Module Index
+          <span class="search-toggle"><img src="./images/find.png"
+            height="16" width="16" alt="[+]"
+            title="show/hide quicksearch" /></span></h3>
+        <form action="#" method="get" accept-charset="utf-8" class="initially-hidden">
+        <fieldset>
+          <legend>Quicksearch</legend>
+          <input type="text" name="quicksearch" value=""
+            class="quicksearch-field" />
+        </fieldset>
+        </form>
+
+        <ul class="link-list">
+        
+          <li><a href="./SQLConstructor.html">SQLConstructor</a></li>
+        
+          <li><a href="./SQLConstructor/BasicDelete.html">SQLConstructor::BasicDelete</a></li>
+        
+          <li><a href="./SQLConstructor/BasicDelete_mysql.html">SQLConstructor::BasicDelete_mysql</a></li>
+        
+          <li><a href="./SQLConstructor/BasicInsert.html">SQLConstructor::BasicInsert</a></li>
+        
+          <li><a href="./SQLConstructor/BasicInsert_mysql.html">SQLConstructor::BasicInsert_mysql</a></li>
+        
+          <li><a href="./SQLConstructor/BasicJoin.html">SQLConstructor::BasicJoin</a></li>
+        
+          <li><a href="./SQLConstructor/BasicJoin_mysql.html">SQLConstructor::BasicJoin_mysql</a></li>
+        
+          <li><a href="./SQLConstructor/BasicSelect.html">SQLConstructor::BasicSelect</a></li>
+        
+          <li><a href="./SQLConstructor/BasicSelect_example.html">SQLConstructor::BasicSelect_example</a></li>
+        
+          <li><a href="./SQLConstructor/BasicSelect_mysql.html">SQLConstructor::BasicSelect_mysql</a></li>
+        
+          <li><a href="./SQLConstructor/BasicUnion.html">SQLConstructor::BasicUnion</a></li>
+        
+          <li><a href="./SQLConstructor/BasicUpdate.html">SQLConstructor::BasicUpdate</a></li>
+        
+          <li><a href="./SQLConstructor/BasicUpdate_mysql.html">SQLConstructor::BasicUpdate_mysql</a></li>
+        
+          <li><a href="./SQLConstructor/GenericQuery.html">SQLConstructor::GenericQuery</a></li>
+        
+          <li><a href="./SQLConstructor/QAttr.html">SQLConstructor::QAttr</a></li>
+        
+          <li><a href="./SQLExporter.html">SQLExporter</a></li>
+        
+          <li><a href="./SQLExporter/Exporter_generic.html">SQLExporter::Exporter_generic</a></li>
+        
+          <li><a href="./SQLExporter/Exporter_mysql.html">SQLExporter::Exporter_mysql</a></li>
+        
+          <li><a href="./SQLConditional.html">SQLConditional</a></li>
+        
+          <li><a href="./SQLConditional/BasicCond.html">SQLConditional::BasicCond</a></li>
+        
+          <li><a href="./Object.html">Object</a></li>
+        
+          <li><a href="./SQLAliasedList.html">SQLAliasedList</a></li>
+        
+          <li><a href="./SQLColumn.html">SQLColumn</a></li>
+        
+          <li><a href="./SQLCondList.html">SQLCondList</a></li>
+        
+          <li><a href="./SQLConstructorTest.html">SQLConstructorTest</a></li>
+        
+          <li><a href="./SQLObject.html">SQLObject</a></li>
+        
+          <li><a href="./SQLValList.html">SQLValList</a></li>
+        
+          <li><a href="./SQLValue.html">SQLValue</a></li>
+        
+        </ul>
+        <div id="no-class-search-results" style="display: none;">No matching classes.</div>
+      </div>
+
+      
+    </div>
+  </div>
+
+  <div id="documentation">
+    <h1 class="class">SQLConditional</h1>
+
+    <div id="description" class="description">
+      
+<p>This class represents an SQL conditional statement.</p>
+<table class="rdoc-list"><tr><td class="rdoc-term"><p>Author</p></td>
+<td>
+<p>Vasiliy Korol  (<a href="mailto:vakorol@mail.ru">vakorol@mail.ru</a>)</p>
+</td></tr><tr><td class="rdoc-term"><p>Copyright</p></td>
+<td>
+<p>Vasiliy Korol © 2014</p>
+</td></tr><tr><td class="rdoc-term"><p>License</p></td>
+<td>
+<p>Distributes under terms of GPLv2</p>
+</td></tr></table>
+
+    </div><!-- description -->
+
+    
+    
+    
+    <div id="5Buntitled-5D" class="documentation-section">
+      
+
+      
+
+      
+
+      
+      <!-- Attributes -->
+      <div id="attribute-method-details" class="method-section section">
+        <h3 class="section-header">Attributes</h3>
+
+        
+        <div id="caller-attribute-method" class="method-detail">
+          <a name="caller"></a>
+          
+          <a name="caller="></a>
+          
+          <div class="method-heading attribute-method-heading">
+            <span class="method-name">caller</span><span
+              class="attribute-access-type">[RW]</span>
+          </div>
+
+          <div class="method-description">
+          
+          
+          
+          </div>
+        </div>
+        
+      </div><!-- attribute-method-details -->
+      
+
+      <!-- Methods -->
+      
+      <div id="public-class-method-details" class="method-section section">
+        <h3 class="section-header">Public Class Methods</h3>
+
+      
+        <div id="new-method" class="method-detail ">
+          <a name="method-c-new"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">new</span><span
+              class="method-args">( params = nil )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Class constructor. Accepts an optional parameter to set the @caller 
+attribute, which is used in <a
+href="SQLConditional.html#method-i-method_missing">method_missing</a> magic
+method to return  control to the calling <a
+href="SQLConstructor.html">SQLConstructor</a> object (see <a
+href="SQLConditional.html#method-i-method_missing">method_missing</a> for 
+more info).</p>
+            
+
+            
+            <div class="method-source-code" id="new-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 22</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span> ( <span class="ruby-identifier">params</span> = <span class="ruby-keyword">nil</span> )
+    <span class="ruby-ivar">@dialect</span>, <span class="ruby-ivar">@tidy</span>, <span class="ruby-ivar">@separator</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-keyword">false</span>, <span class="ruby-string">&quot; &quot;</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+        <span class="ruby-ivar">@caller</span> = <span class="ruby-identifier">params</span>[ <span class="ruby-value">:caller</span>  ]
+        <span class="ruby-keyword">if</span> <span class="ruby-ivar">@caller</span>
+            <span class="ruby-ivar">@dialect</span>   = <span class="ruby-identifier">params</span>[ <span class="ruby-value">:dialect</span> ] <span class="ruby-operator">||</span> <span class="ruby-ivar">@caller</span>.<span class="ruby-identifier">dialect</span>
+            <span class="ruby-ivar">@tidy</span>      = <span class="ruby-identifier">params</span>[ <span class="ruby-value">:tidy</span>    ] <span class="ruby-operator">||</span> <span class="ruby-ivar">@caller</span>.<span class="ruby-identifier">tidy</span>
+            <span class="ruby-ivar">@separator</span> = <span class="ruby-ivar">@caller</span>.<span class="ruby-identifier">exporter</span>.<span class="ruby-identifier">separator</span>  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@caller</span>.<span class="ruby-identifier">exporter</span>  
+        <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-ivar">@list</span>    = [ ]
+    <span class="ruby-ivar">@objects</span> = [ ]
+    <span class="ruby-ivar">@string</span>  = <span class="ruby-keyword">nil</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- new-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- new-method -->
+
+      
+      </div><!-- public-class-method-details -->
+    
+      <div id="public-instance-method-details" class="method-section section">
+        <h3 class="section-header">Public Instance Methods</h3>
+
+      
+        <div id="and-method" class="method-detail ">
+          <a name="method-i-and"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">and</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="and-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 65</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">and</span>
+    <span class="ruby-identifier">_addBasicCond</span>( <span class="ruby-value">:AND</span>, <span class="ruby-constant">BasicCond</span><span class="ruby-operator">::</span><span class="ruby-constant">MIDDLE</span> )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- and-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- and-method -->
+
+      
+        <div id="eq-method" class="method-detail ">
+          <a name="method-i-eq"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">eq</span><span
+              class="method-args">( expr1, expr2 )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="eq-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 73</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">eq</span> ( <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+    <span class="ruby-identifier">_addBasicCond</span>( <span class="ruby-value">:'='</span>, <span class="ruby-constant">BasicCond</span><span class="ruby-operator">::</span><span class="ruby-constant">MIDDLE</span>, <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- eq-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- eq-method -->
+
+      
+        <div id="gt-method" class="method-detail ">
+          <a name="method-i-gt"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">gt</span><span
+              class="method-args">( expr1, expr2 )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="gt-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 81</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">gt</span> ( <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+    <span class="ruby-identifier">_addBasicCond</span>( <span class="ruby-value">:'&gt;'</span>, <span class="ruby-constant">BasicCond</span><span class="ruby-operator">::</span><span class="ruby-constant">MIDDLE</span>, <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- gt-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- gt-method -->
+
+      
+        <div id="gte-method" class="method-detail ">
+          <a name="method-i-gte"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">gte</span><span
+              class="method-args">( expr1, expr2 )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="gte-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 89</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">gte</span> ( <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> ) 
+    <span class="ruby-identifier">_addBasicCond</span>( <span class="ruby-value">:'&gt;='</span>, <span class="ruby-constant">BasicCond</span><span class="ruby-operator">::</span><span class="ruby-constant">MIDDLE</span>, <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- gte-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- gte-method -->
+
+      
+        <div id="in-method" class="method-detail ">
+          <a name="method-i-in"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">in</span><span
+              class="method-args">( expr1, expr2 )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="in-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 105</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">in</span> ( <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> ) 
+    <span class="ruby-identifier">_addBasicCond</span>( <span class="ruby-value">:'IN'</span>, <span class="ruby-constant">BasicCond</span><span class="ruby-operator">::</span><span class="ruby-constant">MIDDLE</span>, <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- in-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- in-method -->
+
+      
+        <div id="is-method" class="method-detail ">
+          <a name="method-i-is"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">is</span><span
+              class="method-args">( cond )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Adds another <a href="SQLConditional.html">SQLConditional</a> object to the
+conditions list of the current object. Example:</p>
+
+<pre>&lt;tt&gt;cond1 = SQLConditional.new.eq(':c1',3)&lt;/tt&gt;
+&lt;tt&gt;cond2 = SQLConditional.new.lt(':c2',5).and.is(cond2)&lt;/tt&gt;</pre>
+            
+
+            
+            <div class="method-source-code" id="is-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 43</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">is</span> ( <span class="ruby-identifier">cond</span> )
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">SQLException</span>, <span class="ruby-constant">ERR_INVALID_CONDITIONAL</span>  <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span> <span class="ruby-identifier">cond</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">SQLObject</span>
+    <span class="ruby-identifier">cond</span>.<span class="ruby-identifier">separator</span> = <span class="ruby-ivar">@separator</span>
+    <span class="ruby-ivar">@list</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">cond</span>
+    <span class="ruby-ivar">@string</span> = <span class="ruby-keyword">nil</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-keyword">self</span>     
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- is-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- is-method -->
+
+      
+        <div id="is_not_null-method" class="method-detail ">
+          <a name="method-i-is_not_null"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">is_not_null</span><span
+              class="method-args">( expr )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="is_not_null-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 101</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">is_not_null</span> ( <span class="ruby-identifier">expr</span> )
+    <span class="ruby-identifier">_addBasicCond</span>( <span class="ruby-value">:'IS NOT NULL'</span>, <span class="ruby-constant">BasicCond</span><span class="ruby-operator">::</span><span class="ruby-constant">RHS</span>, <span class="ruby-constant">SQLObject</span>.<span class="ruby-identifier">get</span>( <span class="ruby-identifier">expr</span> ) )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- is_not_null-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- is_not_null-method -->
+
+      
+        <div id="is_null-method" class="method-detail ">
+          <a name="method-i-is_null"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">is_null</span><span
+              class="method-args">( expr )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="is_null-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 97</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">is_null</span> ( <span class="ruby-identifier">expr</span> )
+    <span class="ruby-identifier">_addBasicCond</span>( <span class="ruby-value">:'IS NULL'</span>, <span class="ruby-constant">BasicCond</span><span class="ruby-operator">::</span><span class="ruby-constant">RHS</span>, <span class="ruby-constant">SQLObject</span>.<span class="ruby-identifier">get</span>( <span class="ruby-identifier">expr</span> ) )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- is_null-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- is_null-method -->
+
+      
+        <div id="like-method" class="method-detail ">
+          <a name="method-i-like"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">like</span><span
+              class="method-args">( expr1, expr2 )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="like-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 113</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">like</span> ( <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+    <span class="ruby-identifier">_addBasicCond</span>( <span class="ruby-value">:'LIKE'</span>, <span class="ruby-constant">BasicCond</span><span class="ruby-operator">::</span><span class="ruby-constant">MIDDLE</span>, <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- like-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- like-method -->
+
+      
+        <div id="lt-method" class="method-detail ">
+          <a name="method-i-lt"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">lt</span><span
+              class="method-args">( expr1, expr2 )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="lt-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 85</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">lt</span> ( <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+    <span class="ruby-identifier">_addBasicCond</span>( <span class="ruby-value">:'&lt;'</span>, <span class="ruby-constant">BasicCond</span><span class="ruby-operator">::</span><span class="ruby-constant">MIDDLE</span>, <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- lt-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- lt-method -->
+
+      
+        <div id="lte-method" class="method-detail ">
+          <a name="method-i-lte"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">lte</span><span
+              class="method-args">( expr1, expr2 )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="lte-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 93</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">lte</span> ( <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> ) 
+    <span class="ruby-identifier">_addBasicCond</span>( <span class="ruby-value">:'&lt;='</span>, <span class="ruby-constant">BasicCond</span><span class="ruby-operator">::</span><span class="ruby-constant">MIDDLE</span>, <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- lte-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- lte-method -->
+
+      
+        <div id="method_missing-method" class="method-detail ">
+          <a name="method-i-method_missing"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">method_missing</span><span
+              class="method-args">( method, *args )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Return control to the object stored in @caller.  This allows mixing the
+methods different classes, i.e.:</p>
+
+<pre>&lt;tt&gt;SQLConstructor.new.select(':a').from('tab').where.eq(':b',3).limit(5)&lt;/tt&gt;</pre>
+
+<p>Here .where.eq() returns an <a
+href="SQLConditional.html">SQLConditional</a> object, but further usage of
+the foreign method .limit() returns back to the <a
+href="SQLConstructor.html">SQLConstructor</a> object.</p>
+            
+
+            
+            <div class="method-source-code" id="method_missing-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 143</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">method_missing</span> ( <span class="ruby-identifier">method</span>, *<span class="ruby-identifier">args</span> )
+    <span class="ruby-keyword">return</span> <span class="ruby-ivar">@caller</span>.<span class="ruby-identifier">send</span>( <span class="ruby-identifier">method</span>.<span class="ruby-identifier">to_sym</span>, *<span class="ruby-identifier">args</span> )  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@caller</span>
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">NoMethodError</span>, <span class="ruby-constant">ERR_UNKNOWN_METHOD</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;: &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">method</span>.<span class="ruby-identifier">to_s</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- method_missing-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- method_missing-method -->
+
+      
+        <div id="ne-method" class="method-detail ">
+          <a name="method-i-ne"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">ne</span><span
+              class="method-args">( expr1, expr2 )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="ne-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 77</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">ne</span> ( <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+    <span class="ruby-identifier">_addBasicCond</span>( <span class="ruby-value">:'!='</span>, <span class="ruby-constant">BasicCond</span><span class="ruby-operator">::</span><span class="ruby-constant">MIDDLE</span>, <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- ne-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- ne-method -->
+
+      
+        <div id="not-method" class="method-detail ">
+          <a name="method-i-not"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">not</span><span
+              class="method-args">( *expr )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Negates the following conditional statement.</p>
+            
+
+            
+            <div class="method-source-code" id="not-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 61</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">not</span> ( *<span class="ruby-identifier">expr</span> )
+    <span class="ruby-identifier">_addBasicCond</span>( <span class="ruby-value">:NOT</span>, <span class="ruby-constant">BasicCond</span><span class="ruby-operator">::</span><span class="ruby-constant">LHS</span>, *<span class="ruby-identifier">expr</span> )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- not-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- not-method -->
+
+      
+        <div id="not_in-method" class="method-detail ">
+          <a name="method-i-not_in"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">not_in</span><span
+              class="method-args">( expr1, expr2 )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="not_in-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 109</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">not_in</span> ( <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> ) 
+    <span class="ruby-identifier">_addBasicCond</span>( <span class="ruby-value">:'NOT IN'</span>, <span class="ruby-constant">BasicCond</span><span class="ruby-operator">::</span><span class="ruby-constant">MIDDLE</span>, <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- not_in-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- not_in-method -->
+
+      
+        <div id="not_is-method" class="method-detail ">
+          <a name="method-i-not_is"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">not_is</span><span
+              class="method-args">( cond )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Same as .is(), but negated</p>
+            
+
+            
+            <div class="method-source-code" id="not_is-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 54</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">not_is</span> ( <span class="ruby-identifier">cond</span> )
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">not</span>( <span class="ruby-identifier">cond</span> )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- not_is-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- not_is-method -->
+
+      
+        <div id="not_like-method" class="method-detail ">
+          <a name="method-i-not_like"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">not_like</span><span
+              class="method-args">( expr1, expr2 )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="not_like-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 117</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">not_like</span> ( <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+    <span class="ruby-identifier">_addBasicCond</span>( <span class="ruby-value">:'NOT LIKE'</span>, <span class="ruby-constant">BasicCond</span><span class="ruby-operator">::</span><span class="ruby-constant">MIDDLE</span>, <span class="ruby-identifier">expr1</span>, <span class="ruby-identifier">expr2</span> )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- not_like-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- not_like-method -->
+
+      
+        <div id="or-method" class="method-detail ">
+          <a name="method-i-or"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">or</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="or-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 69</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">or</span>
+    <span class="ruby-identifier">_addBasicCond</span>( <span class="ruby-value">:OR</span>, <span class="ruby-constant">BasicCond</span><span class="ruby-operator">::</span><span class="ruby-constant">MIDDLE</span> )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- or-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- or-method -->
+
+      
+        <div id="to_s-method" class="method-detail ">
+          <a name="method-i-to_s"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">to_s</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="to_s-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 122</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">to_s</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-ivar">@string</span>  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@string</span>
+    <span class="ruby-ivar">@string</span> = <span class="ruby-ivar">@separator</span>
+    <span class="ruby-ivar">@string</span> <span class="ruby-operator">+=</span> <span class="ruby-string">&quot;(&quot;</span>
+
+    <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">item</span><span class="ruby-operator">|</span>
+        <span class="ruby-ivar">@string</span> <span class="ruby-operator">+=</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">to_s</span>
+    <span class="ruby-keyword">end</span>
+
+    <span class="ruby-ivar">@string</span> <span class="ruby-operator">+=</span> <span class="ruby-string">&quot;)&quot;</span>
+
+    <span class="ruby-keyword">return</span> <span class="ruby-ivar">@string</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- to_s-source -->
+            
+          </div>
+
+          
+          <div class="aliases">
+            Also aliased as: <a href="SQLConditional.html#method-i-to_str">to_str</a>
+          </div>
+          
+
+          
+        </div><!-- to_s-method -->
+
+      
+        <div id="to_str-method" class="method-detail method-alias">
+          <a name="method-i-to_str"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">to_str</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>Dirty hack to make .join work on an array of SQLObjects</p>
+            
+
+            
+          </div>
+
+          
+
+          
+          <div class="aliases">
+            Alias for: <a href="SQLConditional.html#method-i-to_s">to_s</a>
+          </div>
+          
+        </div><!-- to_str-method -->
+
+      
+      </div><!-- public-instance-method-details -->
+    
+      <div id="private-instance-method-details" class="method-section section">
+        <h3 class="section-header">Private Instance Methods</h3>
+
+      
+        <div id="_addBasicCond-method" class="method-detail ">
+          <a name="method-i-_addBasicCond"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">_addBasicCond</span><span
+              class="method-args">( operator, type, *expressions )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="_addBasicCond-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlconditional.rb, line 151</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">_addBasicCond</span> ( <span class="ruby-identifier">operator</span>, <span class="ruby-identifier">type</span>, *<span class="ruby-identifier">expressions</span> )
+    <span class="ruby-identifier">objects</span> = <span class="ruby-constant">SQLObject</span>.<span class="ruby-identifier">get</span>( *<span class="ruby-identifier">expressions</span> )
+    <span class="ruby-ivar">@list</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">BasicCond</span>.<span class="ruby-identifier">new</span>( <span class="ruby-identifier">operator</span>, <span class="ruby-identifier">type</span>, *<span class="ruby-identifier">objects</span> )
+    <span class="ruby-ivar">@string</span> = <span class="ruby-keyword">nil</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- _addBasicCond-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- _addBasicCond-method -->
+
+      
+      </div><!-- private-instance-method-details -->
+    
+    </div><!-- 5Buntitled-5D -->
+  
+
+  </div><!-- documentation -->
+
+  <div id="validator-badges">
+    <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+    <p><small>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish
+      Rdoc Generator</a> 2</small>.</p>
+  </div>
+
+</body>
+</html>
+

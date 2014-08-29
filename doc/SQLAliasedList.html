@@ -1,0 +1,717 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+
+  <title>Class: SQLAliasedList</title>
+
+  <link rel="stylesheet" href="./rdoc.css" type="text/css" media="screen" />
+
+  <script src="./js/jquery.js" type="text/javascript" charset="utf-8"></script>
+  <script src="./js/thickbox-compressed.js" type="text/javascript" charset="utf-8"></script>
+  <script src="./js/quicksearch.js" type="text/javascript" charset="utf-8"></script>
+  <script src="./js/darkfish.js" type="text/javascript" charset="utf-8"></script>
+
+</head>
+<body id="top" class="class">
+
+  <div id="metadata">
+    <div id="home-metadata">
+      <div id="home-section" class="section">
+        <h3 class="section-header">
+          <a href="./index.html">Home</a>
+          <a href="./index.html#classes">Classes</a>
+          <a href="./index.html#methods">Methods</a>
+        </h3>
+      </div>
+    </div>
+
+    <div id="file-metadata">
+      <div id="file-list-section" class="section">
+        <h3 class="section-header">In Files</h3>
+        <div class="section-body">
+          <ul>
+          
+            <li><a href="./lib/sqlobject_rb.html?TB_iframe=true&amp;height=550&amp;width=785"
+              class="thickbox" title="lib/sqlobject.rb">lib/sqlobject.rb</a></li>
+          
+          </ul>
+        </div>
+      </div>
+
+      
+    </div>
+
+    <div id="class-metadata">
+      
+      <!-- Parent Class -->
+      <div id="parent-class-section" class="section">
+        <h3 class="section-header">Parent</h3>
+        
+        <p class="link"><a href="SQLObject.html">SQLObject</a></p>
+        
+      </div>
+      
+
+      
+
+      
+
+      
+      <!-- Method Quickref -->
+      <div id="method-list-section" class="section">
+        <h3 class="section-header">Methods</h3>
+        <ul class="link-list">
+          
+          <li><a href="#method-c-new">::new</a></li>
+          
+          <li><a href="#method-i-3C-3C">#<<</a></li>
+          
+          <li><a href="#method-i-5B-5D">#[]</a></li>
+          
+          <li><a href="#method-i-_getList">#_getList</a></li>
+          
+          <li><a href="#method-i-_hash2array">#_hash2array</a></li>
+          
+          <li><a href="#method-i-delete_if">#delete_if</a></li>
+          
+          <li><a href="#method-i-each">#each</a></li>
+          
+          <li><a href="#method-i-each_with_index">#each_with_index</a></li>
+          
+          <li><a href="#method-i-find">#find</a></li>
+          
+          <li><a href="#method-i-length">#length</a></li>
+          
+          <li><a href="#method-i-push">#push</a></li>
+          
+          <li><a href="#method-i-select">#select</a></li>
+          
+          <li><a href="#method-i-to_s">#to_s</a></li>
+          
+        </ul>
+      </div>
+      
+
+      
+    </div>
+
+    <div id="project-metadata">
+      
+      
+      <div id="fileindex-section" class="section project-section">
+        <h3 class="section-header">Files</h3>
+        <ul>
+        
+          <li class="file"><a href="./Rakefile.html">Rakefile</a></li>
+        
+        </ul>
+      </div>
+      
+
+      <div id="classindex-section" class="section project-section">
+        <h3 class="section-header">Class/Module Index
+          <span class="search-toggle"><img src="./images/find.png"
+            height="16" width="16" alt="[+]"
+            title="show/hide quicksearch" /></span></h3>
+        <form action="#" method="get" accept-charset="utf-8" class="initially-hidden">
+        <fieldset>
+          <legend>Quicksearch</legend>
+          <input type="text" name="quicksearch" value=""
+            class="quicksearch-field" />
+        </fieldset>
+        </form>
+
+        <ul class="link-list">
+        
+          <li><a href="./SQLConstructor.html">SQLConstructor</a></li>
+        
+          <li><a href="./SQLConstructor/BasicDelete.html">SQLConstructor::BasicDelete</a></li>
+        
+          <li><a href="./SQLConstructor/BasicDelete_mysql.html">SQLConstructor::BasicDelete_mysql</a></li>
+        
+          <li><a href="./SQLConstructor/BasicInsert.html">SQLConstructor::BasicInsert</a></li>
+        
+          <li><a href="./SQLConstructor/BasicInsert_mysql.html">SQLConstructor::BasicInsert_mysql</a></li>
+        
+          <li><a href="./SQLConstructor/BasicJoin.html">SQLConstructor::BasicJoin</a></li>
+        
+          <li><a href="./SQLConstructor/BasicJoin_mysql.html">SQLConstructor::BasicJoin_mysql</a></li>
+        
+          <li><a href="./SQLConstructor/BasicSelect.html">SQLConstructor::BasicSelect</a></li>
+        
+          <li><a href="./SQLConstructor/BasicSelect_example.html">SQLConstructor::BasicSelect_example</a></li>
+        
+          <li><a href="./SQLConstructor/BasicSelect_mysql.html">SQLConstructor::BasicSelect_mysql</a></li>
+        
+          <li><a href="./SQLConstructor/BasicUnion.html">SQLConstructor::BasicUnion</a></li>
+        
+          <li><a href="./SQLConstructor/BasicUpdate.html">SQLConstructor::BasicUpdate</a></li>
+        
+          <li><a href="./SQLConstructor/BasicUpdate_mysql.html">SQLConstructor::BasicUpdate_mysql</a></li>
+        
+          <li><a href="./SQLConstructor/GenericQuery.html">SQLConstructor::GenericQuery</a></li>
+        
+          <li><a href="./SQLConstructor/QAttr.html">SQLConstructor::QAttr</a></li>
+        
+          <li><a href="./SQLExporter.html">SQLExporter</a></li>
+        
+          <li><a href="./SQLExporter/Exporter_generic.html">SQLExporter::Exporter_generic</a></li>
+        
+          <li><a href="./SQLExporter/Exporter_mysql.html">SQLExporter::Exporter_mysql</a></li>
+        
+          <li><a href="./SQLConditional.html">SQLConditional</a></li>
+        
+          <li><a href="./SQLConditional/BasicCond.html">SQLConditional::BasicCond</a></li>
+        
+          <li><a href="./Object.html">Object</a></li>
+        
+          <li><a href="./SQLAliasedList.html">SQLAliasedList</a></li>
+        
+          <li><a href="./SQLColumn.html">SQLColumn</a></li>
+        
+          <li><a href="./SQLCondList.html">SQLCondList</a></li>
+        
+          <li><a href="./SQLConstructorTest.html">SQLConstructorTest</a></li>
+        
+          <li><a href="./SQLObject.html">SQLObject</a></li>
+        
+          <li><a href="./SQLValList.html">SQLValList</a></li>
+        
+          <li><a href="./SQLValue.html">SQLValue</a></li>
+        
+        </ul>
+        <div id="no-class-search-results" style="display: none;">No matching classes.</div>
+      </div>
+
+      
+    </div>
+  </div>
+
+  <div id="documentation">
+    <h1 class="class">SQLAliasedList</h1>
+
+    <div id="description" class="description">
+      
+<p>Class container - a list of SQLObjects with aliases</p>
+
+    </div><!-- description -->
+
+    
+    
+    
+    <div id="5Buntitled-5D" class="documentation-section">
+      
+
+      
+
+      
+
+      
+      <!-- Attributes -->
+      <div id="attribute-method-details" class="method-section section">
+        <h3 class="section-header">Attributes</h3>
+
+        
+        <div id="no_commas-attribute-method" class="method-detail">
+          <a name="no_commas"></a>
+          
+          <a name="no_commas="></a>
+          
+          <div class="method-heading attribute-method-heading">
+            <span class="method-name">no_commas</span><span
+              class="attribute-access-type">[W]</span>
+          </div>
+
+          <div class="method-description">
+          
+          
+          
+          </div>
+        </div>
+        
+      </div><!-- attribute-method-details -->
+      
+
+      <!-- Methods -->
+      
+      <div id="public-class-method-details" class="method-section section">
+        <h3 class="section-header">Public Class Methods</h3>
+
+      
+        <div id="new-method" class="method-detail ">
+          <a name="method-c-new"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">new</span><span
+              class="method-args">( *list )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="new-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlobject.rb, line 195</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span> ( *<span class="ruby-identifier">list</span> )
+    <span class="ruby-ivar">@list</span> = <span class="ruby-identifier">_getList</span> *<span class="ruby-identifier">list</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- new-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- new-method -->
+
+      
+      </div><!-- public-class-method-details -->
+    
+      <div id="public-instance-method-details" class="method-section section">
+        <h3 class="section-header">Public Instance Methods</h3>
+
+      
+        <div id="3C-3C-method" class="method-detail ">
+          <a name="method-i-3C-3C"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">&lt;&lt;</span><span
+              class="method-args">( *list )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="3C-3C-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlobject.rb, line 199</span>
+<span class="ruby-keyword">def</span> <span class="ruby-operator">&lt;&lt;</span> ( *<span class="ruby-identifier">list</span> )
+    <span class="ruby-ivar">@list</span> <span class="ruby-operator">+=</span> <span class="ruby-identifier">_getList</span> *<span class="ruby-identifier">list</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-keyword">self</span> 
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- 3C-3C-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- 3C-3C-method -->
+
+      
+        <div id="5B-5D-method" class="method-detail ">
+          <a name="method-i-5B-5D"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">[]</span><span
+              class="method-args">(i)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="5B-5D-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlobject.rb, line 220</span>
+<span class="ruby-keyword">def</span> <span class="ruby-operator">[]</span> (<span class="ruby-identifier">i</span>)
+    <span class="ruby-ivar">@list</span>[<span class="ruby-identifier">i</span>]
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- 5B-5D-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- 5B-5D-method -->
+
+      
+        <div id="delete_if-method" class="method-detail ">
+          <a name="method-i-delete_if"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">delete_if</span><span
+              class="method-args">( &block )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="delete_if-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlobject.rb, line 216</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">delete_if</span> ( &amp;<span class="ruby-identifier">block</span> )
+    <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">delete_if</span> &amp;<span class="ruby-identifier">block</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- delete_if-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- delete_if-method -->
+
+      
+        <div id="each-method" class="method-detail ">
+          <a name="method-i-each"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">each</span><span
+              class="method-args">( &block )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="each-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlobject.rb, line 212</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">each</span> ( &amp;<span class="ruby-identifier">block</span> )
+    <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">each</span> &amp;<span class="ruby-identifier">block</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- each-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- each-method -->
+
+      
+        <div id="each_with_index-method" class="method-detail ">
+          <a name="method-i-each_with_index"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">each_with_index</span><span
+              class="method-args">( &block )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="each_with_index-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlobject.rb, line 232</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">each_with_index</span> ( &amp;<span class="ruby-identifier">block</span> )
+    <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">each_with_index</span> &amp;<span class="ruby-identifier">block</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- each_with_index-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- each_with_index-method -->
+
+      
+        <div id="find-method" class="method-detail ">
+          <a name="method-i-find"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">find</span><span
+              class="method-args">( &block )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="find-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlobject.rb, line 224</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">find</span> ( &amp;<span class="ruby-identifier">block</span> )
+    <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">find</span> &amp;<span class="ruby-identifier">block</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- find-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- find-method -->
+
+      
+        <div id="length-method" class="method-detail ">
+          <a name="method-i-length"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">length</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="length-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlobject.rb, line 208</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">length</span>
+    <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">length</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- length-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- length-method -->
+
+      
+        <div id="push-method" class="method-detail ">
+          <a name="method-i-push"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">push</span><span
+              class="method-args">( *list )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="push-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlobject.rb, line 204</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">push</span> ( *<span class="ruby-identifier">list</span> )
+    <span class="ruby-ivar">@list</span> <span class="ruby-operator">+=</span> <span class="ruby-identifier">_getList</span>( *<span class="ruby-identifier">list</span> )
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- push-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- push-method -->
+
+      
+        <div id="select-method" class="method-detail ">
+          <a name="method-i-select"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">select</span><span
+              class="method-args">( &block )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="select-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlobject.rb, line 228</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">select</span> ( &amp;<span class="ruby-identifier">block</span> )
+    <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">each</span> &amp;<span class="ruby-identifier">block</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- select-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- select-method -->
+
+      
+        <div id="to_s-method" class="method-detail ">
+          <a name="method-i-to_s"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">to_s</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="to_s-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlobject.rb, line 236</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">to_s</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-ivar">@string</span>  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@string</span>
+    <span class="ruby-identifier">arr</span> = <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">obj</span><span class="ruby-operator">|</span>  <span class="ruby-identifier">obj</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> ( <span class="ruby-identifier">obj</span>.<span class="ruby-identifier">alias</span>  <span class="ruby-operator">?</span> <span class="ruby-string">&quot; &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">obj</span>.<span class="ruby-identifier">alias</span>.<span class="ruby-identifier">to_s</span>  <span class="ruby-operator">:</span> <span class="ruby-string">&quot;&quot;</span> ) }
+    <span class="ruby-identifier">list_separator</span> = <span class="ruby-ivar">@no_commas</span>  <span class="ruby-operator">?</span> <span class="ruby-string">&quot;&quot;</span>  <span class="ruby-operator">:</span> <span class="ruby-string">&quot;,&quot;</span>
+    <span class="ruby-ivar">@string</span> = <span class="ruby-identifier">arr</span>.<span class="ruby-identifier">join</span> <span class="ruby-identifier">list_separator</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- to_s-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- to_s-method -->
+
+      
+      </div><!-- public-instance-method-details -->
+    
+      <div id="private-instance-method-details" class="method-section section">
+        <h3 class="section-header">Private Instance Methods</h3>
+
+      
+        <div id="_getList-method" class="method-detail ">
+          <a name="method-i-_getList"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">_getList</span><span
+              class="method-args">( *list )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="_getList-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlobject.rb, line 245</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">_getList</span> ( *<span class="ruby-identifier">list</span> )
+    <span class="ruby-identifier">new_list</span> = [ ]
+     <span class="ruby-comment"># If list is a hash of objects with aliases:</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">list</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">==</span> <span class="ruby-value">1</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">list</span>[<span class="ruby-value">0</span>].<span class="ruby-identifier">is_a?</span>( <span class="ruby-constant">Hash</span> )
+        <span class="ruby-identifier">new_list</span> <span class="ruby-operator">+=</span> <span class="ruby-identifier">_hash2array</span> <span class="ruby-identifier">list</span>[<span class="ruby-value">0</span>]
+     <span class="ruby-comment"># If list is an array of objects:</span>
+    <span class="ruby-keyword">else</span>
+        <span class="ruby-identifier">new_list</span> = <span class="ruby-identifier">list</span>.<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">src</span><span class="ruby-operator">|</span>  <span class="ruby-constant">SQLObject</span>.<span class="ruby-identifier">get</span> <span class="ruby-identifier">src</span> }
+    <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- _getList-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- _getList-method -->
+
+      
+        <div id="_hash2array-method" class="method-detail ">
+          <a name="method-i-_hash2array"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">_hash2array</span><span
+              class="method-args">( hash )</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            
+            
+
+            
+            <div class="method-source-code" id="_hash2array-source">
+<pre>
+<span class="ruby-comment"># File lib/sqlobject.rb, line 256</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">_hash2array</span> ( <span class="ruby-identifier">hash</span> )
+    <span class="ruby-identifier">list</span> = [ ]
+    <span class="ruby-identifier">hash</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">item</span>, <span class="ruby-identifier">_alias</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">obj</span> = <span class="ruby-constant">SQLObject</span>.<span class="ruby-identifier">get</span> <span class="ruby-identifier">item</span>
+        <span class="ruby-identifier">obj</span>.<span class="ruby-identifier">alias</span> = <span class="ruby-identifier">_alias</span>
+        <span class="ruby-identifier">list</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">obj</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">list</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- _hash2array-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- _hash2array-method -->
+
+      
+      </div><!-- private-instance-method-details -->
+    
+    </div><!-- 5Buntitled-5D -->
+  
+
+  </div><!-- documentation -->
+
+  <div id="validator-badges">
+    <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+    <p><small>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish
+      Rdoc Generator</a> 2</small>.</p>
+  </div>
+
+</body>
+</html>
+

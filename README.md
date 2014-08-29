@@ -1,8 +1,8 @@
 sqlconstructor-ruby
 ===================
 
-SQLConstructor - Ruby gem for constructing SQL queries via object-oriented API.
-Currently only MySQL dialect is supported. Hopefully, Informix syntax will be added, too.
+SQLConstructor - Ruby gem for constructing SQL queries via object-oriented interface.
+Currently only MySQL dialect is supported, but hopefully, IBM Informix syntax will be added, too.
 It is easy to add support for mostly any SQL dialect - see files lib/dialects/example-constructor.rb
 and lib/dialects/example-exporter.rb.
 
@@ -99,29 +99,30 @@ Queries can be modified "on the fly", which can be useful for dynamic constructi
 
 The list of available methods for the SQL queries:
 
-|SELECT         |DELETE       |INSERT    |UPDATE  |
-|---------------|-------------|----------|--------|
-|select         |delete       |insert    |tables  |
-|from           |from         |into      |set     |
-|where          |where        |values    |where   |
-|select_more    |using        |set       |first   |
-|having         |order_by     |columns   |skip    |
-|distinct       |order_by_asc |select    |        |
-|all            |order_by_desc|          |        |
-|distinctrow    |first        |          |        |
-|join           |skip         |          |        |
-|group_by       |             |          |        |
-|group_by_asc   |             |          |        |
-|group_by_desc  |             |          |        |
-|order_by       |             |          |        |
-|order_by_asc   |             |          |        |
-|order_by_desc  |             |          |        |
-|first          |             |          |        |
-|skip           |             |          |        |
-|union          |             |          |        |   
-|union_all      |             |          |        |   
-|union_distinct |             |          |        |   
+|SELECT         |DELETE       |INSERT    |UPDATE     |
+|---------------|-------------|----------|-----------|
+|select         |delete       |insert    |update     |
+|from           |from         |into      |update_more|
+|where          |where        |values    |tables     |
+|select_more    |using        |set       |set        |
+|having         |order_by     |columns   |where      |
+|distinct       |order_by_asc |select    |first      |
+|all            |order_by_desc|          |skip       |
+|distinctrow    |first        |          |           |
+|join           |skip         |          |           |
+|group_by       |             |          |           |
+|group_by_asc   |             |          |           |
+|group_by_desc  |             |          |           |
+|order_by       |             |          |           |
+|order_by_asc   |             |          |           |
+|order_by_desc  |             |          |           |
+|first          |             |          |           |
+|skip           |             |          |           |
+|union          |             |          |           |   
+|union_all      |             |          |           |   
+|union_distinct |             |          |           |   
                                                      
+
 MySQL-specific methods:                              
 
 |SELECT              |DELETE      |INSERT                 |UPDATE      |
