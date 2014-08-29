@@ -80,7 +80,7 @@ class SQLConstructor < SQLObject
     #   the @exporter object.
     ##########################################################################
     def to_s
-        return @string  if @string
+#        return @string  if @string
         @obj.inline = self.inline
         @string = @exporter.export @obj
     end
@@ -145,7 +145,7 @@ class SQLConstructor < SQLObject
   ###############################################################################################
     class GenericQuery < SQLObject
 
-        attr_accessor :caller
+        attr_accessor :caller, :string
         attr_reader :type, :dialect, :exporter, :child_caller, :tidy, :gen_index_hints
 
          # Dirty hack to make .join work on an array of GenericQueries
@@ -168,9 +168,9 @@ class SQLConstructor < SQLObject
         #   Returns an object by clause (keys of METHODS hash) or by SQLObject.name
         ##########################################################################
         def _get ( clause, *args )
-            name = args  ? args[0]  : nil
             result = nil
             if @methods.has_key? clause
+                name = args  ? args[0]  : nil
                 result = self.send @methods[clause].name
                 result = result.val  if result.is_a? QAttr
                 if name && [ Array, SQLValList, SQLAliasedList, SQLCondList ].include?( result.class )
@@ -188,10 +188,9 @@ class SQLConstructor < SQLObject
         #   defined explicitly (not in METHODS).
         ##########################################################################
         def _remove ( clause, *args )
-            name = args  ? args[0]  : nil
-            result = nil
             if @methods.has_key? clause
                 _attr = self.send @methods[clause].name
+                name = args  ? args[0]  : nil
                 if name && [ Array, SQLValList, SQLAliasedList, SQLCondList ].include?( _attr.class )
                     _attr.delete_if { |obj|  obj.name == name }
                 else
@@ -209,7 +208,6 @@ class SQLConstructor < SQLObject
         def to_s
             return @string  if @string
             @string = @exporter.export self
-            return @string
         end
  
         ##########################################################################
@@ -455,7 +453,7 @@ class SQLConstructor < SQLObject
         METHODS = {
             :where    => QAttr.new( :name => 'gen_where', :text => 'WHERE', 
                                         :val => SQLConditional ),
-            :from     => QAttr.new( :name => 'gen_from',  :text => 'FROM',  :val => SQLObject ),
+            :from     => QAttr.new( :name => 'gen_from',  :text => 'FROM',  :val => SQLAliasedList ),
             :all         => QAttr.new( :name => 'sel_distinction', :text => 'ALL'         ),
             :distinct    => QAttr.new( :name => 'sel_distinction', :text => 'DISTINCT'    ),
             :distinctrow => QAttr.new( :name => 'sel_distinction', :text => 'DISTINCTROW' ),
@@ -532,12 +530,9 @@ class SQLConstructor < SQLObject
         METHODS = { 
                     :using => QAttr.new( :name => 'del_using', :text => 'USING', 
                                          :val => SQLObject ),
-                    :join => SQLConstructor::QAttr.new( :name => "gen_joins", :text => "JOIN", 
-                                                        :val => SQLConstructor::BasicJoin, 
-                                                        :val_type => 'list' ),
                     :where => QAttr.new( :name => 'gen_where', :text => 'WHERE', 
                                          :val => SQLConditional ),
-                    :from  => QAttr.new( :name => 'gen_from',  :text => 'FROM',  :val => SQLObject ),
+                    :from  => QAttr.new( :name => 'gen_from',  :text => 'FROM',  :val => SQLAliasedList ),
                     :first => QAttr.new( :name => 'gen_first', :text => 'FIRST', :val => SQLObject ),
                     :skip  => QAttr.new( :name => 'gen_skip',  :text => 'SKIP',  :val => SQLObject ),
                     :order_by => QAttr.new( :name => 'gen_order_by', :text => 'ORDER BY', 
