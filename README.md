@@ -15,6 +15,7 @@ and table names, aliases and everything that goes unescaped is passed as symbols
 Detailed rdoc class documentation can be found in the doc folder.
 
 Typical usage:
+--------------
 
 ```ruby
 sql = SQLConstructor.new
@@ -97,49 +98,64 @@ Queries can be modified "on the fly", which can be useful for dynamic constructi
     (x != 'SOME TEXT')
 ```
 
+Methods
+-------
+
 The list of available methods for the SQL queries:
 
-|SELECT         |DELETE       |INSERT    |UPDATE     |
-|---------------|-------------|----------|-----------|
-|select         |delete       |insert    |update     |
-|from           |from         |into      |update_more|
-|where          |where        |values    |tables     |
-|select_more    |using        |set       |set        |
-|having         |order_by     |columns   |where      |
-|distinct       |order_by_asc |select    |first      |
-|all            |order_by_desc|          |skip       |
-|distinctrow    |first        |          |           |
-|join           |skip         |          |           |
-|group_by       |             |          |           |
-|group_by_asc   |             |          |           |
-|group_by_desc  |             |          |           |
-|order_by       |             |          |           |
-|order_by_asc   |             |          |           |
-|order_by_desc  |             |          |           |
-|first          |             |          |           |
-|skip           |             |          |           |
-|union          |             |          |           |   
-|union_all      |             |          |           |   
-|union_distinct |             |          |           |   
+|SELECT         |DELETE       |INSERT    |UPDATE     |JOIN      |
+|---------------|-------------|----------|-----------|----------|
+|select         |delete       |insert    |update     |on        |
+|from           |from         |into      |update_more|using     |
+|where          |where        |values    |tables     |join_more |
+|select_more    |using        |set       |set        |          |
+|having         |order_by     |columns   |where      |          |
+|distinct       |order_by_asc |select    |first      |          |
+|all            |order_by_desc|          |skip       |          |
+|distinctrow    |first        |          |           |          |
+|join           |skip         |          |           |          |
+|group_by       |             |          |           |          |
+|group_by_asc   |             |          |           |          |
+|group_by_desc  |             |          |           |          |
+|order_by       |             |          |           |          |
+|order_by_asc   |             |          |           |          |
+|order_by_desc  |             |          |           |          |
+|first          |             |          |           |          |
+|skip           |             |          |           |          |
+|union          |             |          |           |          |
+|union_all      |             |          |           |          |
+|union_distinct |             |          |           |          |
                                                      
 
 MySQL-specific methods:                              
 
-|SELECT              |DELETE      |INSERT                 |UPDATE      |
-|--------------------|------------|-----------------------|------------|
-|straight_join       |low_priority|low_priority           |low_priority|
-|sql_cache           |quick       |delayed                |ignore      |
-|sql_no_cache        |ignore      |high_priority          |limit       |
-|high_priority       |limit       |quick                  |            |
-|sql_calc_found_rows |            |ignore                 |            |
-|sql_small_result    |            |on_duplicate_key_update|            |
-|sql_big_result      |            |                       |            |
-|sql_buffer_result   |            |                       |            |
-|limit               |            |                       |            |
-|group_by_with_rollup|            |                       |            |
-|use_index           |            |                       |            |
-|force_index         |            |                       |            |
-|ignore_index        |            |                       |            |
-|use_key             |            |                       |            |
-|force_key           |            |                       |            |
-|ignore_key          |            |                       |            |
+|SELECT                  |DELETE      |INSERT                 |UPDATE      |
+|------------------------|------------|-----------------------|------------|
+|straight_join           |low_priority|low_priority           |low_priority|
+|sql_cache               |quick       |delayed                |ignore      |
+|sql_no_cache            |ignore      |high_priority          |limit       |
+|high_priority           |limit       |quick                  |            |
+|sql_calc_found_rows     |            |ignore                 |            |
+|sql_small_result        |            |on_duplicate_key_update|            |
+|sql_big_result          |            |                       |            |
+|sql_buffer_result       |            |                       |            |
+|limit                   |            |                       |            |
+|group_by_with_rollup    |            |                       |            |
+|use_index               |            |                       |            |
+|force_index             |            |                       |            |
+|ignore_index            |            |                       |            |
+|use_key                 |            |                       |            |
+|force_key               |            |                       |            |
+|ignore_key              |            |                       |            |
+|inner_join              |            |                       |            |
+|cross_join              |            |                       |            |
+|left_join               |            |                       |            |
+|right_join              |            |                       |            |
+|left_outer_join         |            |                       |            |
+|right_outer_join        |            |                       |            |
+|natural_join            |            |                       |            |
+|natural_left_join       |            |                       |            |
+|natural_right_join      |            |                       |            |
+|natural_left_outer_join |            |                       |            |
+|natural_right_outer_join|            |                       |            |
+ 

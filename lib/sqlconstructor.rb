@@ -438,7 +438,7 @@ class SQLConstructor < SQLObject
             :on    => QAttr.new( :name => 'join_on',    :text => 'ON',    :val => SQLConditional ),
             :using => QAttr.new( :name => 'join_using', :text => 'USING', :val => SQLObject      ),
         }
- 
+    
         ##########################################################################
         #   Class contructor. Takes a caller object as the first argument, JOIN 
         #   type as the second argument, and a list of sources for the JOIN clause
