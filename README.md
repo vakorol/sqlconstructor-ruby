@@ -28,7 +28,7 @@ will result in:
 SELECT  col1,col2 FROM table WHERE  (col3 = 16  AND col4 < 5)
 ```
 
-One can also construct complex queries like:
+One can also build complex queries like:
 
 ```ruby
     sql = SQLConstructor.new( :tidy => true, :dialect => 'mysql' )
